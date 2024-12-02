@@ -1,4 +1,4 @@
-import { MicVocal,Disc, LayoutDashboard, Settings, House } from "lucide-react";
+import { MicVocal,Album, LayoutDashboard, Settings, House } from "lucide-react";
 import Link from "next/link";
 const Sidebar = () => {
   return (
@@ -24,9 +24,9 @@ const Sidebar = () => {
                 </Link>
             </li>
             <li>
-                <Link href="#" className="flex items-center gap-2 p-4">
-                <Disc size={16} />
-                Titres
+                <Link href="/albums" className="flex items-center gap-2 p-4">
+                <Album size={16} />
+                Albums
                 </Link>
             </li>
         </ul>
