@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import AlbumPreview from './AlbumPreview';
 import { formatDuration } from '@/utils';
-import TrackList from './TrackList';
+import TrackForm from './TrackForm';
 import Input from '@/components/UI/form/Input';
 import Select from '../form/Select';
 
@@ -15,9 +15,7 @@ function AlbumForm({ onCancel }) {
     artist: '',
     releaseDate: '',
     genres: [],
-    tracks: [],
-    collaborators: [],
-    credits: [],
+    audioTracks: [],
     artwork: null,
     duration: 0,
   });
@@ -166,17 +164,9 @@ function AlbumForm({ onCancel }) {
         </div>
       </div>
       <div className="space-y-4">
-        <div className="flex justify-between">
           <h3 className="text-lg font-semibold">Liste des pistes</h3>
-          <button
-            type="button"
-            className="bg-black text-white p-2 h-min rounded-md"
-          >
-            Ajouter une piste
-          </button>
-        </div>
         <ul className="space-y-2">
-          {album.tracks.map((track, index) => (
+          {album.audioTracks.map((track, index) => (
             <li
               key={track.id}
               draggable
@@ -192,8 +182,8 @@ function AlbumForm({ onCancel }) {
         </ul>
       </div>
       
-      <TrackList
-        tracks={album.tracks}
+      <TrackForm
+        tracks={album.audioTracks}
         onTracksChange={(tracks) => setAlbum({ ...album, tracks })}
       />
 
