@@ -2,11 +2,11 @@ import { MicVocal,Album, LayoutDashboard, Settings, House } from "lucide-react";
 import Link from "next/link";
 const Sidebar = () => {
   return (
-    <aside className="w-64 border-r border-gray-500">
-      <nav className=" h-full flex flex-col justify-between">
+    <aside className=" h-screen border-r border-gray-500">
+      <nav className="w-64 gap-40 flex flex-col justify-between">
         <ul className="border-b border-gray-500">
           <li>
-            <Link href="#" className="flex items-center gap-2 p-4">
+            <Link href="/" className="flex items-center gap-2 p-4">
               <LayoutDashboard size={16} />
               Dashboard
             </Link>

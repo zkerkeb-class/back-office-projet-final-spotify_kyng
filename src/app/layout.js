@@ -19,7 +19,7 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className={`w-screen h-screen ${inter.className}`}>
+      <body className={`w-full h-full ${inter.className}`}>
         <header className="px-6 h-12 flex border-b border-gray-500">
           <Link
             href="/"
@@ -36,7 +36,6 @@ export default function RootLayout({ children }) {
         </header>
         <main className="flex min-w-full">
           <Sidebar />
-
           <section className="flex-1 p-6">{children}</section>
         </main>
       </body>
