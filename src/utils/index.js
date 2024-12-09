@@ -11,3 +11,5 @@ export const formatReleaseDate = (date) => {
         day: 'numeric',
     });
 }
+
+export const formatDateLocale = (date) => new Date(date).toLocaleDateString();
