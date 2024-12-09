@@ -1,9 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import { Description, Dialog, DialogPanel, DialogTitle } from '@headlessui/react';
+import { Dialog, DialogPanel, DialogTitle } from '@headlessui/react';
 import Input from '@/components/UI/form/Input';
 import Textarea from '@/components/UI/form/Textarea';
+import UploadFile from '@/components/upload/UploadFile';
+import CreditForm from './CreditForm';
 
 function TrackForm({ albumId, artistId, tracks, onTracksChange }) {
   const [newTrack, setNewTrack] = useState({
@@ -14,13 +16,32 @@ function TrackForm({ albumId, artistId, tracks, onTracksChange }) {
     artistId: artistId,
     isExplicit: false,
     lyrics: '',
-    credit: [],
+    credits: [],
     numberOfListens: 0,
     popularity: 0,
     audioLink: '',
     trackNumber: tracks.length + 1,
   });
   const [isOpen, setIsOpen] = useState(false);
+
+  const resetForm = () => {
+      setIsOpen(false);
+      setNewTrack({
+        id: tracks.length + 1,
+        title: '',
+        duration: 0,
+        albumId: albumId,
+        artistId: artistId,
+        isExplicit: false,
+        lyrics: '',
+        credits: [],
+        numberOfListens: 0,
+        popularity: 0,
+        audioLink: '',
+        trackNumber: tracks.length + 1,
+      });
+    
+  }
 
   const addTrack = () => {
     if (newTrack.title && newTrack.lyrics) {
@@ -34,7 +55,7 @@ function TrackForm({ albumId, artistId, tracks, onTracksChange }) {
         artistId: artistId,
         isExplicit: false,
         lyrics: '',
-        credit: [],
+        credits: [],
         collaborators: [],
         numberOfListens: 0,
         popularity: 0,
@@ -60,20 +81,15 @@ function TrackForm({ albumId, artistId, tracks, onTracksChange }) {
         onClose={() => setIsOpen(false)}
         className="relative z-50"
       >
-        <div className="bg-opacity-70 bg-black fixed inset-0 w-screen p-10">
-          <DialogPanel className="w-4xl space-y-4 border bg-white p-12">
+        <div className="bg-opacity-70 bg-black fixed inset-0 w-screen p-12">
+          <DialogPanel className="w-4xl h-full space-y-4 border bg-white p-12 overflow-y-scroll">
             <div className="space-y-4">
-              <DialogTitle className="text-lg font-semibold">Ajouter une piste audioLink</DialogTitle>
-              <div className="space-y-2">
+              <DialogTitle className="text-2xl font-semibold">Ajouter une piste audio</DialogTitle>
+              <div className="flex flex-col gap-4">
                 <Input
                   label="Titre de la piste"
                   value={newTrack.title}
                   onChange={(e) => setNewTrack({ ...newTrack, title: e.target.value })}
-                />
-                <Textarea
-                  label="Paroles"
-                  value={newTrack.lyrics}
-                  onChange={(e) => setNewTrack({ ...newTrack, lyrics: e.target.value })}
                 />
                 <Input
                   label="Explicit"
@@ -82,7 +98,25 @@ function TrackForm({ albumId, artistId, tracks, onTracksChange }) {
                   checked={newTrack.isExplicit}
                   onChange={(e) => setNewTrack({ ...newTrack, isExplicit: e.target.checked })}
                 />
-
+                {/* <div className="w-80">
+                  <span className="block text-sm font-medium">Couverture de l'album :</span>
+                  <UploadFile />
+                </div>
+                <div className="w-80">
+                  <span className="block text-sm font-medium">Piste audio :</span>
+                  <UploadFile />
+                </div> */}
+                <CreditForm
+                  credits={newTrack.credits}
+                  onCreditsChange={(newCredits) =>
+                    setNewTrack({ ...newTrack, credits: newCredits })
+                  }
+                />
+                <Textarea
+                  label="Paroles"
+                  value={newTrack.lyrics}
+                  onChange={(e) => setNewTrack({ ...newTrack, lyrics: e.target.value })}
+                />
                 <div className="flex gap-4">
                   <button
                     type="button"
@@ -92,23 +126,7 @@ function TrackForm({ albumId, artistId, tracks, onTracksChange }) {
                     Ajouter
                   </button>
                   <button
-                    onClick={() => {
-                      setIsOpen(false);
-                      setNewTrack({
-                        id: tracks.length + 1,
-                        title: '',
-                        duration: 0,
-                        albumId: albumId,
-                        artistId: artistId,
-                        isExplicit: false,
-                        lyrics: '',
-                        credit: [],
-                        numberOfListens: 0,
-                        popularity: 0,
-                        audioLink: '',
-                        trackNumber: tracks.length + 1,
-                      });
-                    }}
+                    onClick={resetForm}
                   >
                     Annuler
                   </button>
