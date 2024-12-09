@@ -16,6 +16,7 @@
   "description": "",
   "dependencies": {
     "@reduxjs/toolkit": "^2.4.0",
+    "@tanstack/react-table": "^8.20.5",
     "axios": "^1.7.8",
     "image-size": "^1.1.1",
     "lucide-react": "^0.462.0",
@@ -37,7 +38,9 @@
     "eslint-plugin-react-hooks": "^5.0.0",
     "husky": "^9.1.7",
     "lint-staged": "^15.2.10",
-    "prettier": "^3.3.3"
+    "postcss": "^8",
+    "prettier": "^3.3.3",
+    "tailwindcss": "^3.4.1"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
