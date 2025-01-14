@@ -1,0 +1,221 @@
+'use client';
+
+import { useState } from 'react';
+import AlbumPreview from './AlbumPreview';
+import { formatDuration } from '@/utils';
+import TrackForm from './TrackForm';
+import Input from '@/components/UI/form/Input';
+import Select from '../form/Select';
+import UploadFile from '@/components/upload/UploadFile';
+
+function AlbumForm({ onCancel }) {
+  const [isPreview, setIsPreview] = useState(false);
+  const [album, setAlbum] = useState({
+    id: Date.now().toString(),
+    title: '',
+    type: 'album',
+    artist: '',
+    releaseDate: '',
+    genres: [],
+    audioTracks: [],
+    artwork: [],
+    duration: 0,
+  });
+  const genres = [
+    'Rock',
+    'Pop',
+    'Rap',
+    'Jazz',
+    'Blues',
+    'Reggae',
+    'Classique',
+    'Electro',
+    'RnB',
+    'Metal',
+    'Folk',
+    'Country',
+    'Disco',
+    'Funk',
+    'Soul',
+    'Punk',
+    'Hip-Hop',
+    'Techno',
+    'House',
+    'Dance',
+    'Trance',
+    'Dubstep',
+    'Drum & Bass',
+    'Chill',
+    'Ambient',
+    'Reggaeton',
+    'Ska',
+    'Gospel',
+    'Indie',
+    'Alternative',
+    'Grunge',
+    'Hardcore',
+    'Emo',
+    'Screamo',
+    'Post-Rock',
+    'Post-Punk',
+    'Post-Hardcore',
+    'Metalcore',
+    'Deathcore',
+    'Mathcore',
+    'Doom',
+    'Stoner',
+    'Sludge',
+    'Thrash',
+    'Black Metal',
+    'Death Metal',
+    'Power Metal',
+    'Progressive Metal',
+    'Symphonic Metal',
+    'Folk Metal',
+    'Viking Metal',
+    'Pagan Metal',
+    'Gothic Metal',
+    'Industrial Metal',
+    'Nu Metal',
+    'Rap Metal',
+    'Rapcore',
+    'Grindcore',
+    'Metalcore',
+    'Deathcore',
+    'Math',
+  ];
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    // Logique de soumission du formulaire
+    console.log('Album soumis:', { album });
+  };
+  const handleDragStart = (e, index) => {
+    e.dataTransfer.setData('text/plain', index.toString());
+  };
+
+  const handleDrop = (e, targetIndex) => {
+    e.preventDefault();
+    const sourceIndex = parseInt(e.dataTransfer.getData('text/plain'), 10);
+    const newTracks = [...album.tracks];
+    const [removed] = newTracks.splice(sourceIndex, 1);
+    newTracks.splice(targetIndex, 0, removed);
+    // reset trackNumber
+    newTracks.forEach((track, index) => {
+      track.trackNumber = index + 1;
+    });
+    setAlbum({ ...album, tracks: newTracks });
+  };
+
+  if (isPreview) {
+    return (
+      <AlbumPreview
+        album={album}
+        onBack={() => setIsPreview(false)}
+        onPublish={handleSubmit}
+      />
+    );
+  }
+
+  console.log({ album });
+
+  return (
+    <form
+      onSubmit={handleSubmit}
+      className="space-y-8"
+    >
+      <div className="space-y-4">
+        <Input
+          label="Titre de l'album"
+          id="title"
+          value={album.title}
+          onChange={(e) => setAlbum({ ...album, title: e.target.value })}
+          required
+        />
+        <Input
+          label="Artiste"
+          id="artist"
+          value={album.artist}
+          onChange={(e) => setAlbum({ ...album, artist: e.target.value })}
+          required
+        />
+        <Input
+          label="Date de sortie"
+          id="releaseDate"
+          type="date"
+          value={album.releaseDate}
+          onChange={(e) => setAlbum({ ...album, releaseDate: e.target.value })}
+          required
+        />
+
+        <div>
+          <label
+            className="block text-sm font-medium mb-2"
+            htmlFor="genre"
+          >
+            Genres
+          </label>
+          <Select
+            options={genres}
+            onChange={(genres) => setAlbum({ ...album, genres })}
+          />
+        </div>
+        <div className="flex items-center gap-1">
+          <span className="block text-sm font-medium">Duration :</span>
+          <span>{formatDuration(album.duration)}</span>
+        </div>
+      </div>
+      <div className="space-y-4">
+        <h3 className="text-lg font-semibold">Liste des pistes</h3>
+        <ul className="space-y-2">
+          {album.audioTracks.map((track, index) => (
+            <li
+              key={track.id}
+              draggable
+              onDragStart={(e) => handleDragStart(e, index)}
+              onDragOver={(e) => e.preventDefault()}
+              onDrop={(e) => handleDrop(e, index)}
+              className="flex hover:bg-gray-100 items-center space-x-2 p-2 bg-secondary rounded cursor-move"
+            >
+              <span>{index + 1}.</span>
+              <span>{track.title}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <TrackForm
+        tracks={album.audioTracks}
+        onTracksChange={(tracks) => setAlbum({ ...album, audioTracks: tracks })}
+      />
+
+      <div>
+        <span className="block text-sm font-medium">
+          Couverture de l'album <span className="text-red-500">*</span>
+        </span>
+        <UploadFile getUploadedFiles={(files) =>
+          setAlbum({ ...album, artwork: files })
+        } />
+      </div>
+
+      <div className="flex justify-end space-x-4 p-4">
+        <button
+          type="button"
+          variant="outline"
+          onClick={onCancel}
+        >
+          Annuler
+        </button>
+        <button
+          type="button"
+          onClick={() => setIsPreview(true)}
+        >
+          Prévisualiser
+        </button>
+        <button type="submit">Enregistrer</button>
+      </div>
+    </form>
+  );
+}
+
+export default AlbumForm;
