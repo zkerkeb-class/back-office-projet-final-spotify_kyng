@@ -19,24 +19,10 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className={`w-full h-full ${inter.className}`}>
-        <header className="px-6 h-12 flex border-b border-gray-500">
-          <Link
-            href="/"
-            className="flex items-center"
-          >
-            <Image
-              src="/logo.svg"
-              alt="logo"
-              width={32}
-              height={32}
-            />
-            <b>Spotify Portal</b>
-          </Link>
-        </header>
-        <main className="flex min-w-full">
+      <body className={`h-screen ${inter.className}`}>
+        <main className="flex w-full h-full">
           <Sidebar />
-          <section className="flex-1 p-6">{children}</section>
+          <section className="overflow-y-auto p-8">{children}</section>
         </main>
       </body>
     </html>
