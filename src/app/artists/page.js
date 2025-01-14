@@ -62,7 +62,7 @@ const Artists = () => {
     <div className="flex justify-between items-center">
       <h1 className="font-bold text-6xl">Gestion des artistes</h1>
       <Link
-        href="/albums/create"
+        href="/artists/create"
         className="bg-black text-white p-2 h-min rounded-md"
       >
         Ajouter un(e) artiste
