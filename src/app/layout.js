@@ -22,7 +22,7 @@ export default function RootLayout({ children }) {
       <body className={`h-screen ${inter.className}`}>
         <main className="flex w-full h-full">
           <Sidebar />
-          <section className="overflow-y-auto p-8">{children}</section>
+          <section className="flex-1 overflow-y-auto p-8">{children}</section>
         </main>
       </body>
     </html>

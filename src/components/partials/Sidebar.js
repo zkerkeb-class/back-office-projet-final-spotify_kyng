@@ -33,7 +33,7 @@ const Sidebar = () => {
             </Link>
           </li>
            <li className="hover:bg-gray-100">
-                <Link href="#" className="flex items-center gap-2 p-4">
+                <Link href="/artists" className="flex items-center gap-2 p-4">
                 <MicVocal size={16} />
                 Artists
                 </Link>
