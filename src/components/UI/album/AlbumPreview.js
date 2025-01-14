@@ -1,27 +1,25 @@
 'use client';
 
 import DataTable from '@/components/UI/DataTable';
-import { formatDuration } from '@/utils';
+import { formatDuration, formatLongText } from '@/utils';
 import { createColumnHelper } from '@tanstack/react-table';
-import { FileAudio, Pencil, X } from 'lucide-react';
+import { Pencil, X } from 'lucide-react';
+import Image from 'next/image';
 
-const AlbumPreview = ({ album }) => {
+const AlbumPreview = ({ album, onBack, onPublish }) => {
   const columnHelper = createColumnHelper();
-
+console.log({album});
   const tracksColumns = [
-    columnHelper.accessor('id', {
+    columnHelper.accessor('trackNumber', {
+      header: 'N°',
       cell: (info) => info.getValue(),
     }),
-    columnHelper.accessor('titre', {
+    columnHelper.accessor('title', {
+      header: 'Titre',
       cell: (info) => info.getValue(),
     }),
-    columnHelper.accessor('duree', {
-      cell: (info) => info.getValue(),
-    }),
-    columnHelper.accessor('id_Album', {
-      cell: (info) => info.getValue(),
-    }),
-    columnHelper.accessor('explicit', {
+    columnHelper.accessor('isExplicit', {
+      header: 'Explicite',
       cell: (info) => (
         <input
           type="checkbox"
@@ -30,29 +28,42 @@ const AlbumPreview = ({ album }) => {
         />
       ),
     }),
-    columnHelper.accessor('paroles', {
+    columnHelper.accessor('lyrics', {
+      header: 'Paroles',
+      cell: (info) => formatLongText(info.getValue()),
+    }),
+    columnHelper.accessor('credits', {
+      header: 'Crédits',
+      cell: (info) => {
+        if (info.getValue()) {
+          return (
+            <ul>
+              {info.getValue().map((collaborator) => (
+                <li
+                  key={collaborator}
+                  className="mr-2"
+                >
+                  {collaborator}
+                </li>
+              ))}
+            </ul>
+          );
+        }
+        return 'Aucun';
+      },
+    }),
+    columnHelper.accessor('numberOfListens', {
+      header: 'Nombre d\'écoutes',
       cell: (info) => info.getValue(),
     }),
-    columnHelper.accessor('id_Artiste', {
+    columnHelper.accessor('popularity', {
+      header: 'Popularité',
       cell: (info) => info.getValue(),
     }),
-    columnHelper.accessor('credit', {
-      cell: (info) => info.getValue(),
-    }),
-    columnHelper.accessor('nb_ecoute', {
-      cell: (info) => info.getValue(),
-    }),
-    columnHelper.accessor('popularite', {
-      cell: (info) => info.getValue(),
-    }),
-    columnHelper.accessor('audio', {
+    columnHelper.accessor('audioLink', {
+      header: 'Lien audio',
       cell: (info) => (
-        <audio
-          src={info.getValue()}
-          className="flex gap-1"
-        >
-          <FileAudio size={16} /> Ecouter
-        </audio>
+        info.getValue()
       ),
     }),
     columnHelper.accessor('Actions', {
@@ -73,7 +84,7 @@ const AlbumPreview = ({ album }) => {
     <>
       <h2 className="text-3xl font-bold mb-4">Prévisualisation de l'album</h2>
       <div className="flex flex-col gap-4">
-        <div>
+        <div className="flex flex-col gap-2">
           <p>
             <strong>Titre:</strong> {album.title}
           </p>
@@ -88,23 +99,46 @@ const AlbumPreview = ({ album }) => {
           </p>
           <p>
             <strong>Collaborateurs: </strong>
-            {album.collaborators.length ? album.collaborators.join(', ') : 'Aucun'}
+            {album.collaborators ? album.collaborators.join(', ') : 'Aucun'}
           </p>
           <div>
             <strong>Artwork:</strong>
+            {album.artwork && (
+              <Image
+                src={`http://localhost:3000${album.artwork[0]}`}
+                alt="Album Artwork"
+                width={200}
+                height={200}
+              />
+            )}{' '}
           </div>
           <p>
             <strong>Durée:</strong> {formatDuration(album.duration)}
           </p>
         </div>
-        <div>
-          <h4 className="text-xl font-semibold mb-2">Titres</h4>
-          {album.audioData && (
+        {album.audioTracks && (
+          <div>
+            <h4 className="text-xl font-semibold mb-2">Titres</h4>
             <DataTable
-              data={album.audioData}
+              data={album.audioTracks}
               columns={tracksColumns}
             />
-          )}
+          </div>
+        )}
+        <div className="flex justify-end space-x-4 p-4">
+          <button
+            type="button"
+            variant="outline"
+            onClick={onBack}
+          >
+            Retour à l'édition
+          </button>
+          <button
+            type="button"
+            onClick={onPublish}
+          >
+            Publier l'album
+          </button>
         </div>
       </div>
     </>

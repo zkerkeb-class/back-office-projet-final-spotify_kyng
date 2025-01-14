@@ -8,7 +8,7 @@ import ImagePreview from '../upload/ImagePreview';
 
 const socket = io('http://localhost:3000');
 
-const UploadFile = () => {
+const UploadFile = ({getUploadedFiles}) => {
   const [progress, setProgress] = useState(0);
   const [uploading, setUploading] = useState(false);
   const [remainingTime, setRemainingTime] = useState(null);
@@ -86,6 +86,7 @@ const UploadFile = () => {
       });
 
       setUploadedFiles(response.data.files);
+      getUploadedFiles(response.data.files);
       setProgress(100); // Upload terminé
       setUploadError(null); // Réinitialiser l'erreur en cas de succès
       setValidationErrors([]); // Réinitialiser les erreurs de validation

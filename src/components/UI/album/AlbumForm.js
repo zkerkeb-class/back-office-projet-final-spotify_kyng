@@ -6,17 +6,19 @@ import { formatDuration } from '@/utils';
 import TrackForm from './TrackForm';
 import Input from '@/components/UI/form/Input';
 import Select from '../form/Select';
+import UploadFile from '@/components/upload/UploadFile';
 
 function AlbumForm({ onCancel }) {
   const [isPreview, setIsPreview] = useState(false);
   const [album, setAlbum] = useState({
+    id: Date.now().toString(),
     title: '',
     type: 'album',
     artist: '',
     releaseDate: '',
     genres: [],
     audioTracks: [],
-    artwork: null,
+    artwork: [],
     duration: 0,
   });
   const genres = [
@@ -164,7 +166,7 @@ function AlbumForm({ onCancel }) {
         </div>
       </div>
       <div className="space-y-4">
-          <h3 className="text-lg font-semibold">Liste des pistes</h3>
+        <h3 className="text-lg font-semibold">Liste des pistes</h3>
         <ul className="space-y-2">
           {album.audioTracks.map((track, index) => (
             <li
@@ -181,13 +183,22 @@ function AlbumForm({ onCancel }) {
           ))}
         </ul>
       </div>
-      
+
       <TrackForm
         tracks={album.audioTracks}
-        onTracksChange={(tracks) => setAlbum({ ...album, tracks })}
+        onTracksChange={(tracks) => setAlbum({ ...album, audioTracks: tracks })}
       />
 
-      <div className="flex justify-end space-x-4">
+      <div>
+        <span className="block text-sm font-medium">
+          Couverture de l'album <span className="text-red-500">*</span>
+        </span>
+        <UploadFile getUploadedFiles={(files) =>
+          setAlbum({ ...album, artwork: files })
+        } />
+      </div>
+
+      <div className="flex justify-end space-x-4 p-4">
         <button
           type="button"
           variant="outline"

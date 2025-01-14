@@ -13,3 +13,9 @@ export const formatReleaseDate = (date) => {
 }
 
 export const formatDateLocale = (date) => new Date(date).toLocaleDateString();
+
+export const formatLongText = (text, maxLength = 100) => {
+    return text.length > maxLength
+        ? `${text.slice(0, maxLength)}...`
+        : text;
+}

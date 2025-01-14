@@ -7,13 +7,11 @@ import Textarea from '@/components/UI/form/Textarea';
 import UploadFile from '@/components/upload/UploadFile';
 import CreditForm from './CreditForm';
 
-function TrackForm({ albumId, artistId, tracks, onTracksChange }) {
+function TrackForm({ tracks, onTracksChange }) {
   const [newTrack, setNewTrack] = useState({
     id: tracks.length + 1,
     title: '',
     duration: 0,
-    albumId: albumId,
-    artistId: artistId,
     isExplicit: false,
     lyrics: '',
     credits: [],
@@ -25,34 +23,32 @@ function TrackForm({ albumId, artistId, tracks, onTracksChange }) {
   const [isOpen, setIsOpen] = useState(false);
 
   const resetForm = () => {
-      setIsOpen(false);
-      setNewTrack({
-        id: tracks.length + 1,
-        title: '',
-        duration: 0,
-        albumId: albumId,
-        artistId: artistId,
-        isExplicit: false,
-        lyrics: '',
-        credits: [],
-        numberOfListens: 0,
-        popularity: 0,
-        audioLink: '',
-        trackNumber: tracks.length + 1,
-      });
-    
-  }
+    setIsOpen(false);
+    setNewTrack({
+      id: tracks.length + 1,
+      title: '',
+      duration: 0,
+      albumId: albumId,
+      artistId: artistId,
+      isExplicit: false,
+      lyrics: '',
+      credits: [],
+      numberOfListens: 0,
+      popularity: 0,
+      audioLink: '',
+      trackNumber: tracks.length + 1,
+    });
+  };
 
   const addTrack = () => {
-    if (newTrack.title && newTrack.lyrics) {
+    if (newTrack.title && newTrack.audioLink) {
+      console.log("Adding track");
       const updatedTracks = [...tracks, { ...newTrack, id: Date.now().toString() }];
       onTracksChange(updatedTracks);
       setNewTrack({
         id: updatedTracks.length + 1,
         title: '',
         duration: 0,
-        albumId: albumId,
-        artistId: artistId,
         isExplicit: false,
         lyrics: '',
         credits: [],
@@ -62,10 +58,9 @@ function TrackForm({ albumId, artistId, tracks, onTracksChange }) {
         audioLink: '',
         trackNumber: updatedTracks.length + 1,
       });
+      setIsOpen(false);
     }
   };
-
-  console.log({ newTrack });
 
   return (
     <>
@@ -87,25 +82,29 @@ function TrackForm({ albumId, artistId, tracks, onTracksChange }) {
               <DialogTitle className="text-2xl font-semibold">Ajouter une piste audio</DialogTitle>
               <div className="flex flex-col gap-4">
                 <Input
+                  required
                   label="Titre de la piste"
+                  id="trackTitle"
                   value={newTrack.title}
                   onChange={(e) => setNewTrack({ ...newTrack, title: e.target.value })}
                 />
                 <Input
+                  required
                   label="Explicit"
                   id="trackExplicit"
                   type="checkbox"
                   checked={newTrack.isExplicit}
                   onChange={(e) => setNewTrack({ ...newTrack, isExplicit: e.target.checked })}
                 />
-                {/* <div className="w-80">
-                  <span className="block text-sm font-medium">Couverture de l'album :</span>
-                  <UploadFile />
+              
+                <div>
+                  <span className="block text-sm font-medium">
+                    Piste audio <span className="text-red-500">*</span>
+                  </span>
+                  <UploadFile getUploadedFiles={
+                    (files) => setNewTrack({ ...newTrack, audioLink: files[0] })
+                  } />
                 </div>
-                <div className="w-80">
-                  <span className="block text-sm font-medium">Piste audio :</span>
-                  <UploadFile />
-                </div> */}
                 <CreditForm
                   credits={newTrack.credits}
                   onCreditsChange={(newCredits) =>
@@ -114,6 +113,7 @@ function TrackForm({ albumId, artistId, tracks, onTracksChange }) {
                 />
                 <Textarea
                   label="Paroles"
+                  id="trackLyrics"
                   value={newTrack.lyrics}
                   onChange={(e) => setNewTrack({ ...newTrack, lyrics: e.target.value })}
                 />
@@ -125,11 +125,7 @@ function TrackForm({ albumId, artistId, tracks, onTracksChange }) {
                   >
                     Ajouter
                   </button>
-                  <button
-                    onClick={resetForm}
-                  >
-                    Annuler
-                  </button>
+                  <button onClick={resetForm}>Annuler</button>
                 </div>
               </div>
             </div>

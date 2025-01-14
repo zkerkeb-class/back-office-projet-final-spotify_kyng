@@ -1,10 +1,10 @@
 import React from "react";
 import Label from "./Label";
 
-const Input = ({ label, type, id, onChange, placeholder, value, ...props }) => {
+const Input = ({ label, type, id, onChange, placeholder, value,required, ...props }) => {
   return (
     <div className="grid">
-      <Label title={label} htmlFor={id} />
+      <Label title={label} htmlFor={id} isRequired={required} />
       <input
         {...props}
         id={id}
@@ -15,6 +15,7 @@ const Input = ({ label, type, id, onChange, placeholder, value, ...props }) => {
         value={value}
         onChange={onChange}
         placeholder={placeholder}
+        required={required}
       />
     </div>
   );
