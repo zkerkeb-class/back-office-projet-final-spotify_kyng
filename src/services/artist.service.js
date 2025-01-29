@@ -4,6 +4,6 @@ export const getArtists = async () => {
         const data = await response.json();
         return data;
     } catch (error) {
-        console.error('Error fetching top artists', error);
+        console.error('Error fetching artists', error);
     }
 }

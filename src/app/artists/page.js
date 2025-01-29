@@ -11,8 +11,6 @@ const [artistsData, setArtistsData] = React.useState([]);
 React.useEffect(() => {
   const fetchArtists = async () => {
     const data = await getArtists();
-    console.log(data);
-    
     setArtistsData(data.artists);
   }
   fetchArtists();
