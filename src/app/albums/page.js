@@ -1,6 +1,6 @@
 'use client';
 
-import DataTable from '@/components/UI/DataTable';
+import DataTable from '@/components/ui/DataTable';
 import { formatDateLocale } from '@/utils';
 import { createColumnHelper } from '@tanstack/react-table';
 import { Pencil, X } from 'lucide-react';
