@@ -1,7 +1,7 @@
 'use client';
 
 import DataTable from '@/components/ui/DataTable';
-import { getAlbums } from '@/services/album.service';
+import { deleteAlbum, getAlbums } from '@/services/album.service';
 import { formatDateLocale } from '@/utils';
 import { createColumnHelper } from '@tanstack/react-table';
 import { Pencil, X } from 'lucide-react';
@@ -85,14 +85,37 @@ const Albums = () => {
   //   },
   // ];
 
+  const generateRandomString = () => Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+
   const [albumData, setAlbumData] = useState([]);
+  const [meta, setMeta] = useState({
+    limit: undefined,
+    page: undefined,
+    total: undefined,
+    totalPages: undefined,
+  });
+  const fetchAlbums = async (page) => {
+    const data = await getAlbums(page);
+console.log(data);
+
+    setAlbumData(data.albums);
+    setMeta(data.meta);
+  };
   useEffect(() => {
-    const fetchAlbums = async () => {
-      const data = await getAlbums();
-      setAlbumData(data.albums);
-    };
     fetchAlbums();
   }, []);
+
+  const handleDelete = async (id) => {
+    try {
+      const data = await deleteAlbum(id);
+      console.log(data);
+      fetchAlbums();
+      console.log('Deleting album with id : ', id);
+    } catch (error) {
+      console.error('Error deleting album', error);
+    }
+  };
+
   const columnHelper = createColumnHelper();
 
   const columns = [
@@ -106,13 +129,11 @@ const Albums = () => {
     }),
     columnHelper.accessor('releaseDate', {
       header: 'Date de sortie',
-      cell: (info) => formatDateLocale(info.getValue()),
+      cell: (info) => info.getValue() ? formatDateLocale(info.getValue()) : 'Non renseigné',
     }),
     columnHelper.accessor('genre', {
       header: 'Genres',
-      cell: (info) => (
-        <span>{info.getValue() ? info.getValue() : 'Non renseigné'}</span>
-      ),
+      cell: (info) => <span>{info.getValue() ? info.getValue() : 'Non renseigné'}</span>,
     }),
     columnHelper.accessor('audioTracks', {
       header: 'Pistes',
@@ -138,11 +159,11 @@ const Albums = () => {
         return 'Aucun';
       },
     }),
-    columnHelper.accessor('artwork', {
+    columnHelper.accessor('images', {
       header: 'Artwork',
       cell: (info) => (
         <img
-          src={info.getValue()}
+          src={info.getValue()[0].path}
           alt="Artwork"
           className="w-10 h-10 object-cover"
         />
@@ -151,16 +172,33 @@ const Albums = () => {
     columnHelper.accessor('Actions', {
       cell: (info) => (
         <div className="flex gap-1">
-          <button className="p-2 bg-green-500 text-white">
+          <Link href={`/albums/update/${info.row.original._id}`} className="p-2 bg-green-500 text-white">
             <Pencil size={16} />
-          </button>
-          <button className="p-2 bg-red-500 text-white">
+          </Link>
+          <button
+            className="p-2 bg-red-500 text-white"
+            onClick={()=>handleDelete(info.row.original._id)}
+          >
             <X size={16} />
           </button>
         </div>
       ),
     }),
   ];
+
+  const handlePrevious = () => {
+    setMeta((prev) => {
+      fetchAlbums(prev.page - 1);
+      return { ...prev, page: prev.page - 1 };
+    });
+  };
+
+  const handleNext = () => {
+    setMeta((prev) => {
+      fetchAlbums(prev.page + 1);
+      return { ...prev, page: prev.page + 1 };
+    });
+  };
 
   return (
     <>
@@ -177,6 +215,24 @@ const Albums = () => {
         data={albumData}
         columns={columns}
       />
+
+      <div className="flex justify-center mt-4">
+        <button
+          className="p-2 bg-gray-300 rounded-l-md disabled:cursor-not-allowed"
+          onClick={handlePrevious}
+          disabled={meta.page === 1}
+        >
+          Précédent
+        </button>
+        <span className="p-2">{meta.page}</span>
+        <button
+          className="p-2 bg-gray-300 rounded-r-md disabled:cursor-not-allowed"
+          onClick={handleNext}
+          disabled={meta.page === meta.totalPages}
+        >
+          Suivant
+        </button>
+      </div>
     </>
   );
 };

@@ -6,6 +6,7 @@ import Input from '@/components/UI/form/Input';
 import Textarea from '@/components/UI/form/Textarea';
 import UploadFile from '@/components/upload/UploadFile';
 import CreditForm from './CreditForm';
+import AudioPreview from '@/components/upload/AudioPreview';
 
 function TrackForm({ tracks, onTracksChange }) {
   const [newTrack, setNewTrack] = useState({
@@ -17,7 +18,7 @@ function TrackForm({ tracks, onTracksChange }) {
     credits: [],
     numberOfListens: 0,
     popularity: 0,
-    audioLink: '',
+    audioLink: undefined,
     trackNumber: tracks.length + 1,
   });
   const [isOpen, setIsOpen] = useState(false);
@@ -35,14 +36,14 @@ function TrackForm({ tracks, onTracksChange }) {
       credits: [],
       numberOfListens: 0,
       popularity: 0,
-      audioLink: '',
+      audioLink: undefined,
       trackNumber: tracks.length + 1,
     });
   };
 
   const addTrack = () => {
     if (newTrack.title && newTrack.audioLink) {
-      console.log("Adding track");
+      console.log('Adding track');
       const updatedTracks = [...tracks, { ...newTrack, id: Date.now().toString() }];
       onTracksChange(updatedTracks);
       setNewTrack({
@@ -96,14 +97,22 @@ function TrackForm({ tracks, onTracksChange }) {
                   checked={newTrack.isExplicit}
                   onChange={(e) => setNewTrack({ ...newTrack, isExplicit: e.target.checked })}
                 />
-              
-                <div>
+
+                <div className="flex flex-col items-start space-y-4">
                   <span className="block text-sm font-medium">
                     Piste audio <span className="text-red-500">*</span>
                   </span>
-                  <UploadFile getUploadedFiles={
+                  <input
+                    type="file"
+                    name=""
+                    onChange={(e) => setNewTrack({ ...newTrack, audioLink: e.target.files[0] })}
+                  />
+                  {newTrack.audioLink && (
+                    <AudioPreview src={URL.createObjectURL(newTrack.audioLink)} />
+                  )}
+                  {/* <UploadFile getUploadedFiles={
                     (files) => setNewTrack({ ...newTrack, audioLink: files[0] })
-                  } />
+                  } /> */}
                 </div>
                 <CreditForm
                   credits={newTrack.credits}

@@ -7,19 +7,19 @@ import TrackForm from './TrackForm';
 import Input from '@/components/UI/form/Input';
 import ImagePreview from '@/components/upload/ImagePreview';
 import { getArtists } from '@/services/artist.service';
-import { createAlbum } from '@/services/album.service';
+import { createAlbum, updateAlbum } from '@/services/album.service';
 import { useRouter } from 'next/navigation';
 
-function AlbumForm({ onCancel }) {
+function AlbumForm({ onCancel, albumData, isEditing }) {
   const router = useRouter();
   const [isPreview, setIsPreview] = useState(false);
   const [album, setAlbum] = useState({
-    title: '',
-    artistId: '',
-    releaseDate: '',
-    genre: '',
-    audioTracks: [],
-    image: undefined,
+    title: '' || albumData.title,
+    artistId: '' || albumData.artistId._id,
+    releaseDate: '' || albumData.releaseDate,
+    genre: '' || albumData.genre,
+    audioTracks: [] || albumData.audioTracks,
+    image: undefined || albumData.images,
     duration: 0,
   });
   const [artists, setArtists] = useState([]);
@@ -27,8 +27,8 @@ function AlbumForm({ onCancel }) {
   useEffect(() => {
     const fetchArtists = async () => {
       try {
-        const fetchedArtists = await getArtists().then((data) => data.artists);
-        setArtists(fetchedArtists);
+        const data = await getArtists();
+        setArtists(data.artists);
       } catch (error) {
         console.error('Error fetching artists', error);
       }
@@ -37,11 +37,19 @@ function AlbumForm({ onCancel }) {
   }, []);
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Logique de soumission du formulaire
     createAlbum(album);
     alert('Album créé avec succès');
     router.push('/albums');
   };
+
+  const handleUpdateSubmit = (e) => {
+    e.preventDefault();
+    // Logique de soumission du formulaire de mise à jour
+    updateAlbum(album);
+    alert('Album mis à jour avec succès');
+    // router.push('/albums');
+  };
+
   const handleDragStart = (e, index) => {
     e.dataTransfer.setData('text/plain', index.toString());
   };
@@ -71,7 +79,7 @@ function AlbumForm({ onCancel }) {
 
   return (
     <form
-      onSubmit={handleSubmit}
+      onSubmit={isEditing ? handleUpdateSubmit : handleSubmit}
       className="space-y-8"
     >
       <div className="space-y-4">
@@ -82,15 +90,9 @@ function AlbumForm({ onCancel }) {
           onChange={(e) => setAlbum({ ...album, title: e.target.value })}
           required
         />
-        {/* <Input
-          label="Artiste"
-          id="artist"
-          value={album.artist}
-          onChange={(e) => setAlbum({ ...album, artist: e.target.value })}
-          required
-        /> */}
         <select
           className={`border rounded-md px-3 py-2 w-full`}
+          value={album.artistId}
           onChange={(e) => setAlbum({ ...album, artistId: e.target.value })}
           required
         >
@@ -100,6 +102,7 @@ function AlbumForm({ onCancel }) {
               <option
                 key={artist._id}
                 value={artist._id}
+                selected={artist._id === album.artistId}
               >
                 {artist.name}
               </option>
@@ -186,7 +189,7 @@ function AlbumForm({ onCancel }) {
         >
           Prévisualiser
         </button>
-        <button type="submit">Enregistrer</button>
+        <button type="submit">{isEditing ? 'Modifier' : 'Enregistrer'}</button>
       </div>
     </form>
   );
