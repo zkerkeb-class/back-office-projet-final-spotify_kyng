@@ -22,6 +22,9 @@ export const createAlbum = async (album) => {
     formData.append('image', album.image);
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/album/${album.artistId}`, {
       method: 'POST',
+      headers:{
+        'Authorization': `Bearer ${localStorage.getItem('token')}`,
+      },
       body: formData,
     });
     const data = await response.json();
@@ -35,6 +38,9 @@ export const deleteAlbum = async (albumId) => {
   try {
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/album/${albumId}`, {
       method: 'DELETE',
+      headers:{
+        'Authorization': `Bearer ${localStorage.getItem('token')}`,
+      },
     });
     const data = await response.json();
     return data;
@@ -52,8 +58,11 @@ export const updateAlbum = async (album) => {
     formData.append('genre', album.genre);
     formData.append('duration', album.duration);
     formData.append('image', album.image);
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/album/${album.id}`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/album/${album._id}`, {
       method: 'PUT',
+      headers:{
+        'Authorization': `Bearer ${localStorage.getItem('token')}`,
+      },
       body: formData,
     });
     const data = await response.json();

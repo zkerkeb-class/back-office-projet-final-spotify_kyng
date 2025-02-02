@@ -49,13 +49,14 @@ const UpdateAlbum = () => {
   if (!album) {
     return <div className="text-gray-400 text-center text-xl py-4">Album introuvable.</div>;
   }
-
+  
   return (
     <>
       <h1 className="font-bold text-6xl">Modification d'un album</h1>
       <AlbumForm
         isEditing
         albumData={{
+          _id: album._id || '',
           title: album.title || '',
           artistId: album.artistId || '',
           releaseDate: album.releaseDate || '',

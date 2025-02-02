@@ -14,14 +14,15 @@ function AlbumForm({ onCancel, albumData, isEditing }) {
   const router = useRouter();
   const [isPreview, setIsPreview] = useState(false);
   const [album, setAlbum] = useState({
-    title: '' || albumData.title,
-    artistId: '' || albumData.artistId._id,
-    releaseDate: '' || albumData.releaseDate,
-    genre: '' || albumData.genre,
-    audioTracks: [] || albumData.audioTracks,
-    image: undefined || albumData.images,
+    title: '' || albumData?.title,
+    artistId: '' || albumData?.artistId._id,
+    releaseDate: '' || albumData?.releaseDate,
+    genre: '' || albumData?.genre,
+    audioTracks: [] || albumData?.audioTracks,
+    image: undefined || albumData?.images,
     duration: 0,
   });
+
   const [artists, setArtists] = useState([]);
 
   useEffect(() => {
@@ -45,9 +46,9 @@ function AlbumForm({ onCancel, albumData, isEditing }) {
   const handleUpdateSubmit = (e) => {
     e.preventDefault();
     // Logique de soumission du formulaire de mise à jour
-    updateAlbum(album);
+    updateAlbum({ ...album, _id: albumData._id });
     alert('Album mis à jour avec succès');
-    // router.push('/albums');
+    router.push('/albums');
   };
 
   const handleDragStart = (e, index) => {
@@ -92,7 +93,6 @@ function AlbumForm({ onCancel, albumData, isEditing }) {
         />
         <select
           className={`border rounded-md px-3 py-2 w-full`}
-          value={album.artistId}
           onChange={(e) => setAlbum({ ...album, artistId: e.target.value })}
           required
         >
