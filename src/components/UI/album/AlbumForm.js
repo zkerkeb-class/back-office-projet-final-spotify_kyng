@@ -19,7 +19,7 @@ function AlbumForm({ onCancel, albumData, isEditing }) {
     releaseDate: '' || albumData?.releaseDate,
     genre: '' || albumData?.genre,
     audioTracks: [] || albumData?.audioTracks,
-    image: undefined || albumData?.images,
+    image: undefined,
     duration: 0,
   });
 
@@ -40,7 +40,7 @@ function AlbumForm({ onCancel, albumData, isEditing }) {
     e.preventDefault();
     createAlbum(album);
     alert('Album créé avec succès');
-    router.push('/albums');
+    // router.push('/albums');
   };
 
   const handleUpdateSubmit = (e) => {
@@ -112,7 +112,7 @@ function AlbumForm({ onCancel, albumData, isEditing }) {
           label="Date de sortie"
           id="releaseDate"
           type="date"
-          value={album.releaseDate}
+          value={album.releaseDate ? album.releaseDate.split('T')[0] : ''}
           onChange={(e) => setAlbum({ ...album, releaseDate: e.target.value })}
           required
         />
@@ -122,7 +122,6 @@ function AlbumForm({ onCancel, albumData, isEditing }) {
           id="genre"
           value={album.genre}
           onChange={(e) => setAlbum({ ...album, genre: e.target.value })}
-          required
         />
 
         <div className="flex items-center gap-1">
@@ -164,6 +163,7 @@ function AlbumForm({ onCancel, albumData, isEditing }) {
         <input
           type="file"
           name="image"
+        
           onChange={(e) => setAlbum({ ...album, image: e.target.files[0] })}
         />
         {album.image && (
@@ -172,7 +172,16 @@ function AlbumForm({ onCancel, albumData, isEditing }) {
             name={album.image.name}
             size={12}
           />
-        )}{' '}
+        )}
+        {
+          isEditing && albumData.image && (
+            <ImagePreview
+              src={albumData.image.path}
+              name={`Artwork - ${albumData.title}`}
+              size={12}
+            />
+          )
+        }
       </div>
 
       <div className="flex justify-end space-x-4 p-4">

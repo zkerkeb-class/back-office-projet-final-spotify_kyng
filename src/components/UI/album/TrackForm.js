@@ -126,7 +126,7 @@ function TrackForm({ tracks, onTracksChange }) {
                   value={newTrack.lyrics}
                   onChange={(e) => setNewTrack({ ...newTrack, lyrics: e.target.value })}
                 />
-                <div className="flex gap-4">
+                <div className="flex justify-end gap-4">
                   <button
                     type="button"
                     className="bg-black text-white p-2 h-min rounded-md"

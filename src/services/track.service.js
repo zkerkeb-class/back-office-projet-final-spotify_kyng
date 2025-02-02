@@ -1,16 +1,17 @@
-export const createTrack = async (trackData) => {
+export const createTrack = async (trackData, albumId, artistId) => {
   try {
     const formData = new FormData();
     formData.append('title', trackData.title);
     formData.append('duration', trackData.duration);
     formData.append('isExplicit', trackData.isExplicit);
-    formData.append('lyrics', trackData.lyrics);
+    formData.append('lyrics', trackData.lyrics|| "Lyrics not available");
     formData.append('numberOfListens', trackData.numberOfListens);
     formData.append('popularity', trackData.popularity);
     formData.append('files', trackData.audioLink);
     formData.append('trackNumber', trackData.trackNumber);
-    formData.append('albumId', trackData.albumId);
-    formData.append('artistId', trackData.artistId);
+    formData.append('albumId', albumId);
+    formData.append('artistId', artistId);
+    formData.append("releaseYear", trackData.releaseYear||2021);
 
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/track/${albumId}`, {
       method: 'POST',

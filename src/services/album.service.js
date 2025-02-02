@@ -1,3 +1,5 @@
+import { createTrack } from "./track.service";
+
 export const getAlbums = async (page, limit = 10) => {
   try {
     const response = await fetch(
@@ -22,12 +24,21 @@ export const createAlbum = async (album) => {
     formData.append('image', album.image);
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/album/${album.artistId}`, {
       method: 'POST',
-      headers:{
-        'Authorization': `Bearer ${localStorage.getItem('token')}`,
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
       },
       body: formData,
     });
     const data = await response.json();
+    console.log({ data });
+
+    Promise.all(
+      album.audioTracks.map(async (trackData) => {
+        const trackResponse = await createTrack(trackData, data._id, album.artistId);
+        console.log('Created track', trackResponse);
+      })
+    );
+
     return data;
   } catch (error) {
     console.error('Error creating album', error);
@@ -38,8 +49,8 @@ export const deleteAlbum = async (albumId) => {
   try {
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/album/${albumId}`, {
       method: 'DELETE',
-      headers:{
-        'Authorization': `Bearer ${localStorage.getItem('token')}`,
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
       },
     });
     const data = await response.json();
@@ -60,8 +71,8 @@ export const updateAlbum = async (album) => {
     formData.append('image', album.image);
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/album/${album._id}`, {
       method: 'PUT',
-      headers:{
-        'Authorization': `Bearer ${localStorage.getItem('token')}`,
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
       },
       body: formData,
     });
