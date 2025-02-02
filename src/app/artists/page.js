@@ -1,18 +1,20 @@
 "use client"
-import DataTable from '@/components/UI/DataTable';
+import DataTable from '@/components/ui/DataTable';
+import { getArtists } from '@/services/artist.service';
 import { createColumnHelper } from '@tanstack/react-table';
 import { Pencil, X } from 'lucide-react';
 import Link from 'next/link';
 import React from 'react';
 
-const Artists = () => {
-  const artistsData = [
-    { name: 'The Beatles', genres: ['Rock'], images: ['https://via.placeholder.com/150'] },
-    { name: 'Michael Jackson', genres: ['Pop', 'Rock', 'R&B'], images: ['https://via.placeholder.com/150'] },
-    { name: 'AC/DC', genres: ['Hard Rock'], images: ['https://via.placeholder.com/150'] },
-    { name: 'Pink Floyd', genres: ['Progressive Rock'], images: ['https://via.placeholder.com/150'] },
-  ];
-
+const Artists =  () => {
+const [artistsData, setArtistsData] = React.useState([]);
+React.useEffect(() => {
+  const fetchArtists = async () => {
+    const data = await getArtists();
+    setArtistsData(data.artists);
+  }
+  fetchArtists();
+}, []);
   const columnHelper = createColumnHelper();
   const columns = [
     columnHelper.accessor('name', {
@@ -22,11 +24,7 @@ const Artists = () => {
     columnHelper.accessor('genres', {
       header: 'Genres',
       cell: (info) => (
-        <ul>
-          {info.getValue().map((genre) => (
-            <li key={genre}>{genre}</li>
-          ))}
-        </ul>
+        <span>{info.getValue() ? info.getValue(): "Non renseigné"}</span>
       ),
     }),
     columnHelper.accessor('images', {

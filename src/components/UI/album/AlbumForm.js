@@ -1,95 +1,56 @@
 'use client';
 
-import { useState } from 'react';
+import { use, useEffect, useState } from 'react';
 import AlbumPreview from './AlbumPreview';
 import { formatDuration } from '@/utils';
 import TrackForm from './TrackForm';
 import Input from '@/components/UI/form/Input';
-import Select from '../form/Select';
-import UploadFile from '@/components/upload/UploadFile';
+import ImagePreview from '@/components/upload/ImagePreview';
+import { getArtists } from '@/services/artist.service';
+import { createAlbum, updateAlbum } from '@/services/album.service';
+import { useRouter } from 'next/navigation';
 
-function AlbumForm({ onCancel }) {
+function AlbumForm({ onCancel, albumData, isEditing }) {
+  const router = useRouter();
   const [isPreview, setIsPreview] = useState(false);
   const [album, setAlbum] = useState({
-    id: Date.now().toString(),
-    title: '',
-    type: 'album',
-    artist: '',
-    releaseDate: '',
-    genres: [],
-    audioTracks: [],
-    artwork: [],
+    title: '' || albumData?.title,
+    artistId: '' || albumData?.artistId._id,
+    releaseDate: '' || albumData?.releaseDate,
+    genre: '' || albumData?.genre,
+    audioTracks: [] || albumData?.audioTracks,
+    image: undefined,
     duration: 0,
   });
-  const genres = [
-    'Rock',
-    'Pop',
-    'Rap',
-    'Jazz',
-    'Blues',
-    'Reggae',
-    'Classique',
-    'Electro',
-    'RnB',
-    'Metal',
-    'Folk',
-    'Country',
-    'Disco',
-    'Funk',
-    'Soul',
-    'Punk',
-    'Hip-Hop',
-    'Techno',
-    'House',
-    'Dance',
-    'Trance',
-    'Dubstep',
-    'Drum & Bass',
-    'Chill',
-    'Ambient',
-    'Reggaeton',
-    'Ska',
-    'Gospel',
-    'Indie',
-    'Alternative',
-    'Grunge',
-    'Hardcore',
-    'Emo',
-    'Screamo',
-    'Post-Rock',
-    'Post-Punk',
-    'Post-Hardcore',
-    'Metalcore',
-    'Deathcore',
-    'Mathcore',
-    'Doom',
-    'Stoner',
-    'Sludge',
-    'Thrash',
-    'Black Metal',
-    'Death Metal',
-    'Power Metal',
-    'Progressive Metal',
-    'Symphonic Metal',
-    'Folk Metal',
-    'Viking Metal',
-    'Pagan Metal',
-    'Gothic Metal',
-    'Industrial Metal',
-    'Nu Metal',
-    'Rap Metal',
-    'Rapcore',
-    'Grindcore',
-    'Metalcore',
-    'Deathcore',
-    'Math',
-  ];
 
+  const [artists, setArtists] = useState([]);
+
+  useEffect(() => {
+    const fetchArtists = async () => {
+      try {
+        const data = await getArtists();
+        setArtists(data.artists);
+      } catch (error) {
+        console.error('Error fetching artists', error);
+      }
+    };
+    fetchArtists();
+  }, []);
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Logique de soumission du formulaire
-    console.log('Album soumis:', { album });
+    createAlbum(album);
+    alert('Album créé avec succès');
+    // router.push('/albums');
   };
+
+  const handleUpdateSubmit = (e) => {
+    e.preventDefault();
+    // Logique de soumission du formulaire de mise à jour
+    updateAlbum({ ...album, _id: albumData._id });
+    alert('Album mis à jour avec succès');
+    router.push('/albums');
+  };
+
   const handleDragStart = (e, index) => {
     e.dataTransfer.setData('text/plain', index.toString());
   };
@@ -117,11 +78,9 @@ function AlbumForm({ onCancel }) {
     );
   }
 
-  console.log({ album });
-
   return (
     <form
-      onSubmit={handleSubmit}
+      onSubmit={isEditing ? handleUpdateSubmit : handleSubmit}
       className="space-y-8"
     >
       <div className="space-y-4">
@@ -132,34 +91,39 @@ function AlbumForm({ onCancel }) {
           onChange={(e) => setAlbum({ ...album, title: e.target.value })}
           required
         />
-        <Input
-          label="Artiste"
-          id="artist"
-          value={album.artist}
-          onChange={(e) => setAlbum({ ...album, artist: e.target.value })}
+        <select
+          className={`border rounded-md px-3 py-2 w-full`}
+          onChange={(e) => setAlbum({ ...album, artistId: e.target.value })}
           required
-        />
+        >
+          <option value="">Choisir un artiste</option>
+          {artists.length > 0 &&
+            artists.map((artist) => (
+              <option
+                key={artist._id}
+                value={artist._id}
+                selected={artist._id === album.artistId}
+              >
+                {artist.name}
+              </option>
+            ))}
+        </select>
         <Input
           label="Date de sortie"
           id="releaseDate"
           type="date"
-          value={album.releaseDate}
+          value={album.releaseDate ? album.releaseDate.split('T')[0] : ''}
           onChange={(e) => setAlbum({ ...album, releaseDate: e.target.value })}
           required
         />
 
-        <div>
-          <label
-            className="block text-sm font-medium mb-2"
-            htmlFor="genre"
-          >
-            Genres
-          </label>
-          <Select
-            options={genres}
-            onChange={(genres) => setAlbum({ ...album, genres })}
-          />
-        </div>
+        <Input
+          label="Genre"
+          id="genre"
+          value={album.genre}
+          onChange={(e) => setAlbum({ ...album, genre: e.target.value })}
+        />
+
         <div className="flex items-center gap-1">
           <span className="block text-sm font-medium">Duration :</span>
           <span>{formatDuration(album.duration)}</span>
@@ -189,13 +153,35 @@ function AlbumForm({ onCancel }) {
         onTracksChange={(tracks) => setAlbum({ ...album, audioTracks: tracks })}
       />
 
-      <div>
+      <div className="flex flex-col items-start space-y-4">
         <span className="block text-sm font-medium">
           Couverture de l'album <span className="text-red-500">*</span>
         </span>
-        <UploadFile getUploadedFiles={(files) =>
+        {/* <UploadFile getUploadedFiles={(files) =>
           setAlbum({ ...album, artwork: files })
-        } />
+        } /> */}
+        <input
+          type="file"
+          name="image"
+        
+          onChange={(e) => setAlbum({ ...album, image: e.target.files[0] })}
+        />
+        {album.image && (
+          <ImagePreview
+            src={URL.createObjectURL(album.image)}
+            name={album.image.name}
+            size={12}
+          />
+        )}
+        {
+          isEditing && albumData.image && (
+            <ImagePreview
+              src={albumData.image.path}
+              name={`Artwork - ${albumData.title}`}
+              size={12}
+            />
+          )
+        }
       </div>
 
       <div className="flex justify-end space-x-4 p-4">
@@ -212,7 +198,7 @@ function AlbumForm({ onCancel }) {
         >
           Prévisualiser
         </button>
-        <button type="submit">Enregistrer</button>
+        <button type="submit">{isEditing ? 'Modifier' : 'Enregistrer'}</button>
       </div>
     </form>
   );

@@ -8,7 +8,7 @@ import Image from 'next/image';
 
 const AlbumPreview = ({ album, onBack, onPublish }) => {
   const columnHelper = createColumnHelper();
-console.log({album});
+
   const tracksColumns = [
     columnHelper.accessor('trackNumber', {
       header: 'N°',
@@ -95,7 +95,8 @@ console.log({album});
             <strong>Date de sortie:</strong> {album.releaseDate}
           </p>
           <p>
-            <strong>Genres:</strong> {album.genres.join(', ')}
+            album.genre
+            {/* <strong>Genres:</strong> {album.genres.join(', ')} */}
           </p>
           <p>
             <strong>Collaborateurs: </strong>

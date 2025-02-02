@@ -1,4 +1,4 @@
-import { MicVocal,Album, LayoutDashboard, Settings, House } from "lucide-react";
+import { MicVocal,Album, LayoutDashboard, Settings, Folder } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 const Sidebar = () => {
@@ -27,15 +27,15 @@ const Sidebar = () => {
             </Link>
           </li>
          <li className="hover:bg-gray-100">
-            <Link href="#" className="flex items-center gap-2 p-4">
-              <House size={16} />
-              Catalogue
+            <Link href="/upload" className="flex items-center gap-2 p-4">
+              <Folder size={16} />
+              Gestions des médias
             </Link>
           </li>
            <li className="hover:bg-gray-100">
                 <Link href="/artists" className="flex items-center gap-2 p-4">
                 <MicVocal size={16} />
-                Artists
+                Artistes
                 </Link>
             </li>
            <li className="hover:bg-gray-100">
