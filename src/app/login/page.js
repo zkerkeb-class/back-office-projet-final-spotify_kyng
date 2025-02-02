@@ -15,9 +15,19 @@ export default function LoginPage() {
   const handleSubmit = async (e) => {
     try {
         e.preventDefault();
-        const token = await login(formData.email, formData.password);
-        localStorage.setItem('token', token);
-        router.push('/');
+        const res = await fetch('/api/auth/login', {
+          method: 'POST',
+          body: JSON.stringify(formData),
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+        const data = await res.json();
+        console.log({ login: data});
+        if (data?.success) {
+          localStorage.setItem('token', data.token);
+          router.push('/');					
+        } 
     } catch (error) {
         console.error('Error during login', error);
     }
