@@ -23,7 +23,7 @@ export default function Home() {
   }
   const fetchMetrics = async () => {
     const metricsfromAPI = await getServerMetrics();
-    console.log({ metricsfromAPI });
+
     const diskUsage = extractPercentage(metricsfromAPI.diskUsage);
     setMetrics({...metricsfromAPI, diskUsage});
   };
@@ -47,7 +47,7 @@ export default function Home() {
         // Garder seulement les 20 dernières valeurs
         if (newHistory[key].length > 20) newHistory[key].shift();
       });
-console.log({newHistory});
+
 
       localStorage.setItem('history', JSON.stringify(newHistory));
 

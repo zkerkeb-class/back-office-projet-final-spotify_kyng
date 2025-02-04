@@ -19,7 +19,7 @@ function AlbumForm({ onCancel, albumData, isEditing }) {
     releaseDate: '' || albumData?.releaseDate,
     genre: '' || albumData?.genre,
     audioTracks: [] || albumData?.audioTracks,
-    image: undefined,
+    image: albumData?.image ,
     duration: 0,
   });
 
@@ -77,6 +77,8 @@ function AlbumForm({ onCancel, albumData, isEditing }) {
       />
     );
   }
+  console.log({album,albumData});
+  
 
   return (
     <form
@@ -166,7 +168,7 @@ function AlbumForm({ onCancel, albumData, isEditing }) {
         
           onChange={(e) => setAlbum({ ...album, image: e.target.files[0] })}
         />
-        {album.image && (
+        {!isEditing && album.image && (
           <ImagePreview
             src={URL.createObjectURL(album.image)}
             name={album.image.name}
@@ -174,7 +176,7 @@ function AlbumForm({ onCancel, albumData, isEditing }) {
           />
         )}
         {
-          isEditing && albumData.image && (
+          isEditing && album.image && (
             <ImagePreview
               src={albumData.image.path}
               name={`Artwork - ${albumData.title}`}

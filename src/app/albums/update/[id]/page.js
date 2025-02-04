@@ -21,8 +21,10 @@ const UpdateAlbum = () => {
         const albumData = await getAlbumById(id);
         setAlbum(albumData);
         console.log(albumData);
-
-        const response = await getTracksByAlbum(id);
+        const albumID = albumData._id;
+        const response = await getTracksByAlbum(albumID);
+        console.log({response});
+        
         setTracks(response.tracks || []);
       } catch (err) {
         setError('Erreur lors du chargement des données.');
@@ -49,6 +51,8 @@ const UpdateAlbum = () => {
   if (!album) {
     return <div className="text-gray-400 text-center text-xl py-4">Album introuvable.</div>;
   }
+  console.log({album});
+  
   
   return (
     <>
@@ -61,7 +65,7 @@ const UpdateAlbum = () => {
           artistId: album.artistId || '',
           releaseDate: album.releaseDate || '',
           genre: album.genre || '',
-          image: album.images[0] || undefined,
+          image: album.images || undefined,
           duration: album.duration || 0,
           audioTracks: tracks || [],
         }}

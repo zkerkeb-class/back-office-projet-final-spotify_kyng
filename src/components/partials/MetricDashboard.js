@@ -263,9 +263,10 @@ const MetricsDashboard = ({ metrics, initialConfig, history }) => {
                       );
                     }}
                   />
-                  <span className="ml-2">{config.title}</span>
+                  <label htmlFor='kpi' className="ml-2">{config.title}</label>
                 </div>
                 <select
+                id='kpi'
                   className="ml-2 p-1 border rounded"
                   value={vizTypes[key]}
                   onChange={(e) =>
