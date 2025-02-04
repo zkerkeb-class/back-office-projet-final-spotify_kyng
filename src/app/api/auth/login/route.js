@@ -13,7 +13,7 @@ export async function POST(request) {
 							name: "token",
 							value: token,
                             path: "/",
-                            maxAge: 60 * 60 * 24 * 7,
+                            maxAge: 60 * 60,
                             httpOnly: true,
 						});
             return Response.json({

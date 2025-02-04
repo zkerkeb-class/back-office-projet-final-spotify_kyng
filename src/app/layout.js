@@ -2,10 +2,9 @@
 import { Inter } from 'next/font/google';
 import Sidebar from '@/components/partials/Sidebar';
 import './globals.css';
-import { useEffect } from 'react';
-import { useRouter } from 'next/router';
 import { usePathname } from 'next/navigation';
 import Head from 'next/head';
+import { Toaster } from '@/components/UI/toaster';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -32,6 +31,7 @@ export default function RootLayout({ children }) {
             <section className="flex-1 overflow-y-auto p-8">{children}</section>
           </main>
         )}
+         <Toaster />
       </body>
     </html>
   );
