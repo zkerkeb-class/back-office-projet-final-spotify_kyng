@@ -1,13 +1,12 @@
 export const getServerMetrics = async () => {
   try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_SOCKET_URL}/metrics`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/metrics`, {
       method: 'GET',
       headers: {
         Authorization: `Bearer ${localStorage.getItem('token')}`,
       },
     });
     const data = await response.json();
-
     return data;
   } catch (error) {
     console.error('Error getting metrics', error);
@@ -16,7 +15,7 @@ export const getServerMetrics = async () => {
 
 export const resetServerMetrics = async () => {
   try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_SOCKET_URL}/metrics/reset`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/metrics/reset`, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${localStorage.getItem('token')}`,
@@ -24,7 +23,6 @@ export const resetServerMetrics = async () => {
       body: JSON.stringify({}),
     });
     const data = await response.json();
-    console.log({ data });
 
     if (data.error) {
       throw new Error(data.error);

@@ -16,7 +16,7 @@ import { Activity, BarChart, AlertCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { resetServerMetrics } from '@/services/metric.service';
 
-const MetricsDashboard = ({ metrics, initialConfig }) => {
+const MetricsDashboard = ({ metrics, initialConfig, history }) => {
   const { toast } = useToast();
   const defaultKPIs = [
     'cpu',
@@ -28,71 +28,52 @@ const MetricsDashboard = ({ metrics, initialConfig }) => {
     'response',
     'disk',
   ];
+  const defaultVizTypes = {
+    cpu: 'gauge',
+    memory: 'value',
+    bandwidth: 'chart',
+    redis: 'value',
+    requests: 'gauge',
+    media: 'chart',
+    response: 'gauge',
+    disk: 'value',
+  };
   const getInitialKPIs = () => {
-    try {
-      const savedKPIs = localStorage.getItem('selectedKPIs');
-      return savedKPIs ? JSON.parse(savedKPIs) : initialConfig?.kpis || defaultKPIs;
-    } catch (error) {
-      console.error('Error loading KPIs from local storage', error);
-      return initialConfig?.kpis || defaultKPIs;
-    }
+    const savedKPIs = localStorage.getItem('selectedKPIs');
+    return savedKPIs ? JSON.parse(savedKPIs) : initialConfig?.kpis || defaultKPIs;
+  };
+
+  const getInitialVizTypes = () => {
+    const savedVizTypes = localStorage.getItem('vizTypes');
+    return savedVizTypes ? JSON.parse(savedVizTypes) : initialConfig?.vizTypes || defaultVizTypes;
   };
 
   // État pour les préférences utilisateur
   const [selectedKPIs, setSelectedKPIs] = useState(undefined);
+  const [vizTypes, setVizTypes] = useState(undefined);
+
   useEffect(() => {
-    try {
-      if (!selectedKPIs) {
-        const savedKPIs = getInitialKPIs();
-        setSelectedKPIs(savedKPIs);
-      } else {
-        localStorage.setItem('selectedKPIs', JSON.stringify(selectedKPIs));
-      }
-    } catch (error) {
-      console.error('Error saving KPIs to local storage', error);
+    if (!selectedKPIs) {
+      const savedKPIs = getInitialKPIs();
+      setSelectedKPIs(savedKPIs);
+    } else {
+      localStorage.setItem('selectedKPIs', JSON.stringify(selectedKPIs));
     }
   }, [selectedKPIs]);
+  useEffect(() => {
+    if (!vizTypes) {
+      const savedVizTypes = getInitialVizTypes();
+      setVizTypes(savedVizTypes);
+    } else {
+      localStorage.setItem('vizTypes', JSON.stringify(vizTypes));
+    }
+  }, [vizTypes]);
 
   const [thresholds, setThresholds] = useState(
     initialConfig?.thresholds || {
-      cpu: 80,
+      memory: 70,
     }
   );
-
-  const [vizTypes, setVizTypes] = useState(
-    initialConfig?.vizTypes || {
-      cpu: 'gauge',
-      memory: 'value',
-      bandwidth: 'chart',
-      redis: 'value',
-      requests: 'gauge',
-      media: 'chart',
-      response: 'gauge',
-    }
-  );
-
-  // Données historiques pour les graphiques
-  const [history, setHistory] = useState({});
-
-  useEffect(() => {
-    // Mise à jour de l'historique des données
-    setHistory((prev) => {
-      const newHistory = { ...prev };
-      const timestamp = new Date().toISOString();
-
-      Object.keys(metrics).forEach((key) => {
-        if (!newHistory[key]) newHistory[key] = [];
-        newHistory[key].push({
-          timestamp,
-          value: typeof metrics[key] === 'object' ? metrics[key].usedMemory : metrics[key],
-        });
-        // Garder seulement les 20 dernières valeurs
-        if (newHistory[key].length > 20) newHistory[key].shift();
-      });
-
-      return newHistory;
-    });
-  }, [metrics]);
 
   // Formattage des données
   const formatBytes = (bytes) => {
@@ -108,9 +89,9 @@ const MetricsDashboard = ({ metrics, initialConfig }) => {
   const onReset = async () => {
     console.log('Resetting configuration');
     try {
-      const message = await resetServerMetrics().then((res) => res.data.message);
+      const data = await resetServerMetrics();
       toast({
-        description: message,
+        description: data.message,
       });
       setSelectedKPIs(defaultKPIs);
     } catch (error) {
@@ -194,34 +175,42 @@ const MetricsDashboard = ({ metrics, initialConfig }) => {
     cpu: {
       title: 'Utilisation du CPU',
       getValue: () => metrics.cpuUsage[0],
+      history: history.cpuUsage,
     },
     memory: {
       title: 'Utilisation de la mémoire',
       getValue: () => metrics.memoryUsage.usedMemory / metrics.memoryUsage.totalMemory,
+      history: history.memoryUsage,
     },
     bandwidth: {
       title: 'Bande passante',
       getValue: () => formatBytes(metrics.bandePassante),
+      history: history.bandePassante,
     },
     redis: {
       title: 'Latence Redis',
       getValue: () => `${metrics.redisLatency}ms`,
+      history: history.redisLatency,
     },
     requests: {
       title: 'Taux de réussite des requêtes',
       getValue: () => metrics.successCount / (metrics.successCount + metrics.failureCount),
+      history: history.successCount,
     },
     media: {
       title: 'Temps de traitement des médias',
       getValue: () => `${metrics.mediaProcessingTime}ms`,
+      history: history.mediaProcessingTime,
     },
     response: {
       title: 'Temps de réponse',
-      getValue: () => `${metrics.responseTime}ms`,
+      getValue: () => `${parseInt(metrics.responseTime)}ms`,
+      history: history.responseTime,
     },
     disk: {
       title: 'Utilisation du disque',
       getValue: () => (metrics.diskUsage === 'N/A' ? 'Non disponible' : `${metrics.diskUsage}%`),
+      history: history.diskUsage,
     },
   };
 
@@ -308,7 +297,7 @@ const MetricsDashboard = ({ metrics, initialConfig }) => {
               value={value}
               thresholdValue={thresholds[kpiId]}
               type={vizTypes[kpiId]}
-              historyData={history[kpiId]}
+              historyData={config.history}
             />
           );
         })}
