@@ -1,13 +1,13 @@
 'use client';
 
-import DataTable from '@/components/ui/DataTable';
+import DataTable from '@/components/UI/DataTable';
 import { deleteAlbum, getAlbums } from '@/services/album.service';
-import { formatDateLocale } from '@/utils';
+import { formatDateLocale, getImageUrl } from '@/utils';
 import { createColumnHelper } from '@tanstack/react-table';
 import { Pencil, X } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-
+import Image from 'next/image';
 const Albums = () => {
   // const albumData = [
   //   {
@@ -116,6 +116,7 @@ console.log(data);
     }
   };
 
+
   const columnHelper = createColumnHelper();
 
   const columns = [
@@ -161,13 +162,17 @@ console.log(data);
     }),
     columnHelper.accessor('images', {
       header: 'Artwork',
-      cell: (info) => (
-        <img
-          src={info.getValue()[0].path}
+      cell: (info) => {
+ 
+        return (
+        <Image
+         src={getImageUrl(info.getValue()[0].path)}
           alt="Artwork"
           className="w-10 h-10 object-cover"
+          width={40}
+          height={40}
         />
-      ),
+      )},
     }),
     columnHelper.accessor('Actions', {
       cell: (info) => (

@@ -2,7 +2,7 @@
 
 import { use, useEffect, useState } from 'react';
 import AlbumPreview from './AlbumPreview';
-import { formatDuration } from '@/utils';
+import { formatDuration, getImageUrl } from '@/utils';
 import TrackForm from './TrackForm';
 import Input from '@/components/UI/form/Input';
 import ImagePreview from '@/components/upload/ImagePreview';
@@ -172,15 +172,15 @@ function AlbumForm({ onCancel, albumData, isEditing }) {
           <ImagePreview
             src={URL.createObjectURL(album.image)}
             name={album.image.name}
-            size={12}
+            size={400}
           />
         )}
         {
           isEditing && album.image && (
             <ImagePreview
-              src={albumData.image.path}
+              src={getImageUrl(albumData.image.path)}
               name={`Artwork - ${albumData.title}`}
-              size={12}
+              size={400}
             />
           )
         }

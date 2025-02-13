@@ -26,12 +26,6 @@ const Sidebar = () => {
               Dashboard
             </Link>
           </li>
-         <li className="hover:bg-gray-100">
-            <Link href="/upload" className="flex items-center gap-2 p-4">
-              <Folder size={16} />
-              Gestions des médias
-            </Link>
-          </li>
            <li className="hover:bg-gray-100">
                 <Link href="/artists" className="flex items-center gap-2 p-4">
                 <MicVocal size={16} />
