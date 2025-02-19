@@ -5,77 +5,13 @@ import { useState } from 'react';
 import UploadFile from '@/components/upload/UploadFile';
 import Label from '@/components/UI/form/Label';
 import Input from '@/components/UI/form/Input';
-import Select from '../form/Select';
-
-const genres = [
-  'Rock',
-  'Pop',
-  'Rap',
-  'Jazz',
-  'Blues',
-  'Reggae',
-  'Classique',
-  'Electro',
-  'RnB',
-  'Metal',
-  'Folk',
-  'Country',
-  'Disco',
-  'Funk',
-  'Soul',
-  'Punk',
-  'Hip-Hop',
-  'Techno',
-  'House',
-  'Dance',
-  'Trance',
-  'Dubstep',
-  'Drum & Bass',
-  'Chill',
-  'Ambient',
-  'Reggaeton',
-  'Ska',
-  'Gospel',
-  'Indie',
-  'Alternative',
-  'Grunge',
-  'Hardcore',
-  'Emo',
-  'Screamo',
-  'Post-Rock',
-  'Post-Punk',
-  'Post-Hardcore',
-  'Metalcore',
-  'Deathcore',
-  'Mathcore',
-  'Doom',
-  'Stoner',
-  'Sludge',
-  'Thrash',
-  'Black Metal',
-  'Death Metal',
-  'Power Metal',
-  'Progressive Metal',
-  'Symphonic Metal',
-  'Folk Metal',
-  'Viking Metal',
-  'Pagan Metal',
-  'Gothic Metal',
-  'Industrial Metal',
-  'Nu Metal',
-  'Rap Metal',
-  'Rapcore',
-  'Grindcore',
-  'Metalcore',
-  'Deathcore',
-  'Math',
-];
+import { genres } from '@/utils';
 
 const ArtistForm = ({ onSubmit, onCancel }) => {
   const [artist, setArtist] = useState({
     name: '',
-    genres: [],
-    images: [],
+    genres: '',
+    images: undefined,
   });
 
   const handleSubmit = (e) => {
@@ -98,16 +34,25 @@ const ArtistForm = ({ onSubmit, onCancel }) => {
         />
       </div>
       <div>
-        <label
-          className="block text-sm font-medium mb-2"
-          htmlFor="genre"
+        <span className="block text-sm font-medium mb-2">
+          Genre <span className="text-red-500">*</span>
+        </span>
+        <select
+          className={`border rounded-md px-3 py-2 w-full`}
+          onChange={(e) => setAlbum({ ...album, genres: e.target.value })}
+          required
         >
-          Genres
-        </label>
-        <Select
-          options={genres}
-          onChange={(genres) => setAlbum({ ...album, genres })}
-        />
+          <option value="">Choisir un genre</option>
+          {genres.map((genre, id) => (
+            <option
+              key={`${genre}-${id}`}
+              value={genre}
+              selected={genre === album.genres}
+            >
+              {genre}
+            </option>
+          ))}
+        </select>
       </div>
       <div>
         <Label title="Images de l'artiste" />

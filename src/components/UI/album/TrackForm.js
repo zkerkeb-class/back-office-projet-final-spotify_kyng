@@ -77,8 +77,8 @@ function TrackForm({ tracks, onTracksChange }) {
         onClose={() => setIsOpen(false)}
         className="relative z-50"
       >
-        <div className="bg-opacity-70 bg-black fixed inset-0 w-screen p-12">
-          <DialogPanel className="w-4xl h-full space-y-4 border bg-white p-12 overflow-y-scroll">
+        <div className="bg-opacity-70 bg-black fixed inset-0 w-screen flex items-center justify-center p-12">
+          <DialogPanel className="w-3/5 h-full space-y-4 border bg-white p-12 overflow-y-auto">
             <div className="space-y-4">
               <DialogTitle className="text-2xl font-semibold">Ajouter une piste audio</DialogTitle>
               <div className="flex flex-col gap-4">
@@ -98,7 +98,7 @@ function TrackForm({ tracks, onTracksChange }) {
                   onChange={(e) => setNewTrack({ ...newTrack, isExplicit: e.target.checked })}
                 />
 
-                <div className="flex flex-col items-start space-y-4">
+                <div className="flex flex-col items-start w-fit space-y-4">
                   <span className="block text-sm font-medium">
                     Piste audio <span className="text-red-500">*</span>
                   </span>

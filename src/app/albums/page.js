@@ -8,6 +8,7 @@ import { Pencil, X } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
+import ConfirmModal from '@/components/UI/form/ConfirmDeleteModal';
 const Albums = () => {
   // const albumData = [
   //   {
@@ -85,7 +86,8 @@ const Albums = () => {
   //   },
   // ];
 
-  const generateRandomString = () => Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+  const generateRandomString = () =>
+    Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
 
   const [albumData, setAlbumData] = useState([]);
   const [meta, setMeta] = useState({
@@ -96,7 +98,7 @@ const Albums = () => {
   });
   const fetchAlbums = async (page) => {
     const data = await getAlbums(page);
-console.log(data);
+    console.log(data);
 
     setAlbumData(data.albums);
     setMeta(data.meta);
@@ -116,7 +118,6 @@ console.log(data);
     }
   };
 
-
   const columnHelper = createColumnHelper();
 
   const columns = [
@@ -130,62 +131,39 @@ console.log(data);
     }),
     columnHelper.accessor('releaseDate', {
       header: 'Date de sortie',
-      cell: (info) => info.getValue() ? formatDateLocale(info.getValue()) : 'Non renseigné',
-    }),
-    columnHelper.accessor('genre', {
-      header: 'Genres',
-      cell: (info) => <span>{info.getValue() ? info.getValue() : 'Non renseigné'}</span>,
+      cell: (info) => (info.getValue() ? formatDateLocale(info.getValue()) : 'Non renseigné'),
     }),
     columnHelper.accessor('audioTracks', {
       header: 'Pistes',
       cell: (info) => info.getValue().length,
     }),
-    columnHelper.accessor('collaborators', {
-      header: 'Collaborateurs',
-      cell: (info) => {
-        if (info.getValue()) {
-          return (
-            <ul>
-              {info.getValue().map((collaborator) => (
-                <li
-                  key={collaborator}
-                  className="mr-2"
-                >
-                  {collaborator}
-                </li>
-              ))}
-            </ul>
-          );
-        }
-        return 'Aucun';
-      },
-    }),
     columnHelper.accessor('images', {
       header: 'Artwork',
       cell: (info) => {
- 
         return (
-        <Image
-         src={getImageUrl(info.getValue()[0].path)}
-          alt="Artwork"
-          className="w-10 h-10 object-cover"
-          width={40}
-          height={40}
-        />
-      )},
+          <Image
+            src={getImageUrl(info.getValue()[0].path)}
+            alt="Artwork"
+            className="w-10 h-10 object-cover"
+            width={40}
+            height={40}
+          />
+        );
+      },
     }),
     columnHelper.accessor('Actions', {
       cell: (info) => (
         <div className="flex gap-1">
-          <Link href={`/albums/update/${info.row.original._id}`} className="p-2 bg-green-500 text-white">
+          <Link
+            href={`/albums/update/${info.row.original._id}`}
+            className="p-2 bg-green-500 text-white"
+          >
             <Pencil size={16} />
           </Link>
-          <button
-            className="p-2 bg-red-500 text-white"
-            onClick={()=>handleDelete(info.row.original._id)}
-          >
-            <X size={16} />
-          </button>
+          <ConfirmModal
+            title={`Vous êtes sur le point de supprimer l'album "${info.row.original.title}" de ${info.row.original.artistId.name}`}
+            onConfirm={() => handleDelete(info.row.original._id)}
+          />
         </div>
       ),
     }),

@@ -2,7 +2,7 @@
 
 import DataTable from '@/components/UI/DataTable';
 import ImagePreview from '@/components/upload/ImagePreview';
-import { formatDuration, formatLongText } from '@/utils';
+import { formatDuration, formatLongText, getImageUrl } from '@/utils';
 import { createColumnHelper } from '@tanstack/react-table';
 import { Pencil, X } from 'lucide-react';
 import Image from 'next/image';
@@ -95,10 +95,6 @@ const AlbumPreview = ({ album, onBack, onPublish, isEditing }) => {
             <strong>Date de sortie:</strong> {album.releaseDate || 'Non défini'}
           </p>
           <p>
-            <strong>Genre :</strong> {album.genre || 'Non défini'}
-            {/* <strong>Genres:</strong> {album.genres.join(', ')} */}
-          </p>
-          <p>
             <strong>Collaborateurs: </strong>
             {album.collaborators ? album.collaborators.join(', ') : 'Aucun'}
           </p>
@@ -121,8 +117,8 @@ const AlbumPreview = ({ album, onBack, onPublish, isEditing }) => {
             )}
             {isEditing && album.image && (
               <ImagePreview
-                src={getImageUrl(albumData.image.path)}
-                name={`Artwork - ${albumData.title}`}
+                src={getImageUrl(album.image.path)}
+                name={`Artwork - ${album.title}`}
                 size={200}
               />
             )}

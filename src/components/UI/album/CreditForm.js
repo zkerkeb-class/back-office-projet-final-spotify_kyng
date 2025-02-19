@@ -3,15 +3,17 @@ import Input from '../form/Input';
 import RadioGroup from '../form/RadioGroup';
 
 const CreditForm = ({ credits, onCreditsChange }) => {
-  const [newCredit, setNewCredit] = useState({ name: '', role: '' });
+  const [newCredit, setNewCredit] = useState({ name: '', role: 'Producteur' });
 
   const addCredit = () => {
     if (newCredit.name && newCredit.role) {
       const updatedCredits = [...credits, { ...newCredit, id: Date.now().toString() }];
       onCreditsChange(updatedCredits);
-      setNewCredit({ name: '', role: '' });
+      setNewCredit({ name: '', role: 'Producteur' });
     }
   };
+  console.log([newCredit, credits]);
+  
 
   return (
     <div className="space-y-4">
@@ -37,7 +39,13 @@ const CreditForm = ({ credits, onCreditsChange }) => {
           />
         </div>
         <div className="flex-1">
-        <RadioGroup options={["Producteur", "Compositeur", "Auteur", "Interprète"]} value={newCredit.role} onChange={(val) => setNewCredit({ ...newCredit, role: val })} label="Rôle" name="creditRole" />
+          <RadioGroup
+            options={['Producteur', 'Compositeur', 'Auteur', 'Interprète']}
+            value={newCredit.role}
+            onChange={(val) => setNewCredit({ ...newCredit, role: val })}
+            label="Rôle"
+            name="creditRole"
+          />
         </div>
         <div className="flex items-end">
           <button

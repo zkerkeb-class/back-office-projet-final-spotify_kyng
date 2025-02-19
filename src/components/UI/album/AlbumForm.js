@@ -1,6 +1,6 @@
 'use client';
 
-import { use, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import AlbumPreview from './AlbumPreview';
 import { formatDuration, genres, getImageUrl } from '@/utils';
 import TrackForm from './TrackForm';
@@ -17,7 +17,7 @@ function AlbumForm({ onCancel, albumData, isEditing }) {
     title: '' || albumData?.title,
     artistId: '' || albumData?.artistId._id,
     releaseDate: '' || albumData?.releaseDate,
-    genre: '' || albumData?.genre,
+    genres: '' || albumData?.genres,
     audioTracks: [] || albumData?.audioTracks,
     image: albumData?.image,
     duration: 0,
@@ -68,14 +68,14 @@ function AlbumForm({ onCancel, albumData, isEditing }) {
   const handleDrop = (e, targetIndex) => {
     e.preventDefault();
     const sourceIndex = parseInt(e.dataTransfer.getData('text/plain'), 10);
-    const newTracks = [...album.tracks];
+    const newTracks = [...album.audioTracks];
     const [removed] = newTracks.splice(sourceIndex, 1);
     newTracks.splice(targetIndex, 0, removed);
     // reset trackNumber
     newTracks.forEach((track, index) => {
       track.trackNumber = index + 1;
     });
-    setAlbum({ ...album, tracks: newTracks });
+    setAlbum({ ...album, audioTracks: newTracks });
   };
 
   if (isPreview) {
@@ -138,27 +138,7 @@ function AlbumForm({ onCancel, albumData, isEditing }) {
           required
         />
 
-        <div>
-          <span className="block text-sm font-medium mb-2">
-            Genre <span className="text-red-500">*</span>
-          </span>
-          <select
-            className={`border rounded-md px-3 py-2 w-full`}
-            onChange={(e) => setAlbum({ ...album, genre: e.target.value })}
-            required
-          >
-            <option value="">Choisir un genre</option>
-            {genres.map((genre, id) => (
-              <option
-                key={`${genre}-${id}`}
-                value={genre}
-                selected={genre === album.genre}
-              >
-                {genre}
-              </option>
-            ))}
-          </select>
-        </div>
+        
 
         <div className="flex items-center gap-1">
           <span className="block text-sm font-medium">Duration :</span>
