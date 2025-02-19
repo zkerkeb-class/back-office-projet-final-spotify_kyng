@@ -2,7 +2,7 @@
 
 import { use, useEffect, useState } from 'react';
 import AlbumPreview from './AlbumPreview';
-import { formatDuration, getImageUrl } from '@/utils';
+import { formatDuration, genres, getImageUrl } from '@/utils';
 import TrackForm from './TrackForm';
 import Input from '@/components/UI/form/Input';
 import ImagePreview from '@/components/upload/ImagePreview';
@@ -19,9 +19,11 @@ function AlbumForm({ onCancel, albumData, isEditing }) {
     releaseDate: '' || albumData?.releaseDate,
     genre: '' || albumData?.genre,
     audioTracks: [] || albumData?.audioTracks,
-    image: albumData?.image ,
+    image: albumData?.image,
     duration: 0,
   });
+
+  const [artistName, setArtistName] = useState('');
 
   const [artists, setArtists] = useState([]);
 
@@ -37,10 +39,18 @@ function AlbumForm({ onCancel, albumData, isEditing }) {
     fetchArtists();
   }, []);
   const handleSubmit = (e) => {
-    e.preventDefault();
-    createAlbum(album);
-    alert('Album créé avec succès');
-    // router.push('/albums');
+      e.preventDefault();
+      createAlbum(album).then((data) => {
+        if (data.error) {
+          alert('Erreur lors de la création de l\'album');
+
+          return;
+
+        } 
+        
+        alert('Album créé avec succès');
+        router.push('/albums'); 
+      })
   };
 
   const handleUpdateSubmit = (e) => {
@@ -71,14 +81,13 @@ function AlbumForm({ onCancel, albumData, isEditing }) {
   if (isPreview) {
     return (
       <AlbumPreview
-        album={album}
+        album={{...album, artistName}}
         onBack={() => setIsPreview(false)}
         onPublish={handleSubmit}
+        isEditing={isEditing}
       />
     );
   }
-  console.log({album,albumData});
-  
 
   return (
     <form
@@ -93,23 +102,33 @@ function AlbumForm({ onCancel, albumData, isEditing }) {
           onChange={(e) => setAlbum({ ...album, title: e.target.value })}
           required
         />
-        <select
-          className={`border rounded-md px-3 py-2 w-full`}
-          onChange={(e) => setAlbum({ ...album, artistId: e.target.value })}
-          required
-        >
-          <option value="">Choisir un artiste</option>
-          {artists.length > 0 &&
-            artists.map((artist) => (
-              <option
-                key={artist._id}
-                value={artist._id}
-                selected={artist._id === album.artistId}
-              >
-                {artist.name}
-              </option>
-            ))}
-        </select>
+        <div>
+          <span className="block text-sm font-medium mb-2">
+            Artiste <span className="text-red-500">*</span>
+          </span>
+          <select
+            className={`border rounded-md px-3 py-2 w-full`}
+            onChange={(e) => {
+              setAlbum({ ...album, artistId: e.target.value })
+              setArtistName(e.target.selectedOptions[0].text);
+            return;
+            }
+          }
+            required
+          >
+            <option value="">Choisir un artiste</option>
+            {artists.length > 0 &&
+              artists.map((artist) => (
+                <option
+                  key={artist._id}
+                  value={artist._id}
+                  selected={artist._id === album.artistId}
+                >
+                  {artist.name}
+                </option>
+              ))}
+          </select>
+        </div>
         <Input
           label="Date de sortie"
           id="releaseDate"
@@ -119,12 +138,27 @@ function AlbumForm({ onCancel, albumData, isEditing }) {
           required
         />
 
-        <Input
-          label="Genre"
-          id="genre"
-          value={album.genre}
-          onChange={(e) => setAlbum({ ...album, genre: e.target.value })}
-        />
+        <div>
+          <span className="block text-sm font-medium mb-2">
+            Genre <span className="text-red-500">*</span>
+          </span>
+          <select
+            className={`border rounded-md px-3 py-2 w-full`}
+            onChange={(e) => setAlbum({ ...album, genre: e.target.value })}
+            required
+          >
+            <option value="">Choisir un genre</option>
+            {genres.map((genre, id) => (
+              <option
+                key={`${genre}-${id}`}
+                value={genre}
+                selected={genre === album.genre}
+              >
+                {genre}
+              </option>
+            ))}
+          </select>
+        </div>
 
         <div className="flex items-center gap-1">
           <span className="block text-sm font-medium">Duration :</span>
@@ -165,25 +199,22 @@ function AlbumForm({ onCancel, albumData, isEditing }) {
         <input
           type="file"
           name="image"
-        
           onChange={(e) => setAlbum({ ...album, image: e.target.files[0] })}
         />
         {!isEditing && album.image && (
           <ImagePreview
             src={URL.createObjectURL(album.image)}
             name={album.image.name}
-            size={400}
+            size={200}
           />
         )}
-        {
-          isEditing && album.image && (
-            <ImagePreview
-              src={getImageUrl(albumData.image.path)}
-              name={`Artwork - ${albumData.title}`}
-              size={400}
-            />
-          )
-        }
+        {isEditing && album.image && (
+          <ImagePreview
+            src={getImageUrl(albumData.image.path)}
+            name={`Artwork - ${albumData.title}`}
+            size={200}
+          />
+        )}
       </div>
 
       <div className="flex justify-end space-x-4 p-4">

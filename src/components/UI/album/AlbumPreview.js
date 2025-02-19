@@ -1,12 +1,13 @@
 'use client';
 
 import DataTable from '@/components/UI/DataTable';
+import ImagePreview from '@/components/upload/ImagePreview';
 import { formatDuration, formatLongText } from '@/utils';
 import { createColumnHelper } from '@tanstack/react-table';
 import { Pencil, X } from 'lucide-react';
 import Image from 'next/image';
 
-const AlbumPreview = ({ album, onBack, onPublish }) => {
+const AlbumPreview = ({ album, onBack, onPublish, isEditing }) => {
   const columnHelper = createColumnHelper();
 
   const tracksColumns = [
@@ -53,7 +54,7 @@ const AlbumPreview = ({ album, onBack, onPublish }) => {
       },
     }),
     columnHelper.accessor('numberOfListens', {
-      header: 'Nombre d\'écoutes',
+      header: "Nombre d'écoutes",
       cell: (info) => info.getValue(),
     }),
     columnHelper.accessor('popularity', {
@@ -62,9 +63,7 @@ const AlbumPreview = ({ album, onBack, onPublish }) => {
     }),
     columnHelper.accessor('audioLink', {
       header: 'Lien audio',
-      cell: (info) => (
-        info.getValue()
-      ),
+      cell: (info) => info.getValue(),
     }),
     columnHelper.accessor('Actions', {
       cell: (info) => (
@@ -79,6 +78,7 @@ const AlbumPreview = ({ album, onBack, onPublish }) => {
       ),
     }),
   ];
+  console.log({ album });
 
   return (
     <>
@@ -86,38 +86,52 @@ const AlbumPreview = ({ album, onBack, onPublish }) => {
       <div className="flex flex-col gap-4">
         <div className="flex flex-col gap-2">
           <p>
-            <strong>Titre:</strong> {album.title}
+            <strong>Titre:</strong> {album.title || 'Non défini'}
           </p>
           <p>
-            <strong>Artiste:</strong> {album.artist}
+            <strong>Artiste:</strong> {album.artistName || 'Non défini'}
           </p>
           <p>
-            <strong>Date de sortie:</strong> {album.releaseDate}
+            <strong>Date de sortie:</strong> {album.releaseDate || 'Non défini'}
           </p>
           <p>
-            album.genre
+            <strong>Genre :</strong> {album.genre || 'Non défini'}
             {/* <strong>Genres:</strong> {album.genres.join(', ')} */}
           </p>
           <p>
             <strong>Collaborateurs: </strong>
             {album.collaborators ? album.collaborators.join(', ') : 'Aucun'}
           </p>
-          <div>
+          <div className="flex flex-col items-start space-y-4">
             <strong>Artwork:</strong>
             {album.artwork && (
               <Image
-                src={`http://localhost:3000${album.artwork[0]}`}
+                src={`${album.artwork[0]}`}
                 alt="Album Artwork"
                 width={200}
                 height={200}
               />
-            )}{' '}
+            )}
+            {!isEditing && album.image && (
+              <ImagePreview
+                src={URL.createObjectURL(album.image)}
+                name={album.image.name}
+                size={200}
+              />
+            )}
+            {isEditing && album.image && (
+              <ImagePreview
+                src={getImageUrl(albumData.image.path)}
+                name={`Artwork - ${albumData.title}`}
+                size={200}
+              />
+            )}
           </div>
           <p>
             <strong>Durée:</strong> {formatDuration(album.duration)}
           </p>
         </div>
-        {album.audioTracks && (
+        {album.audioTracks ?? (
           <div>
             <h4 className="text-xl font-semibold mb-2">Titres</h4>
             <DataTable
