@@ -1,6 +1,7 @@
 'use client';
 import DataTable from '@/components/ui/DataTable';
-import { getArtists } from '@/services/artist.service';
+import ConfirmDeleteModal from '@/components/UI/form/ConfirmDeleteModal';
+import { deleteArtist, getArtists } from '@/services/artist.service';
 import { getImageUrl } from '@/utils';
 import { createColumnHelper } from '@tanstack/react-table';
 import { Pencil, X } from 'lucide-react';
@@ -29,6 +30,8 @@ const Artists = () => {
     }
   };
 
+  console.log({ artistsData });
+
   const columnHelper = createColumnHelper();
   const columns = [
     columnHelper.accessor('name', {
@@ -42,29 +45,26 @@ const Artists = () => {
     columnHelper.accessor('images', {
       header: 'Images',
       cell: (info) => (
-        <ul>
-          {info.getValue().map((image, id) => (
-            <li key={`image-${info.row.original._id}-${id}`}>
-              <Image
-                src={getImageUrl(image)}
-                alt="Artwork"
-                className="w-10 h-10 object-cover"
-                width={40}
-                height={40}
-              />
-            </li>
-          ))}
-        </ul>
+        <Image
+          src={getImageUrl(info.getValue()[0].path)}
+          alt="Artwork"
+          className="w-10 h-10 object-cover"
+          width={40}
+          height={40}
+        />
       ),
     }),
     columnHelper.accessor('Actions', {
       cell: (info) => (
         <div className="flex gap-1">
-          <button className="p-2 bg-green-500 text-white">
+          <Link
+            href={`/artists/update/${info.row.original._id}`}
+            className="p-2 bg-green-500 text-white"
+          >
             <Pencil size={16} />
-          </button>
+          </Link>
           <ConfirmDeleteModal
-            title={`Vous êtes sur le point de supprimer l'album "${info.row.original.title}" de ${info.row.original.artistId.name}`}
+            title={`Vous êtes sur le point de supprimer l'artiste ${info.row.original.name}`}
             onConfirm={() => handleDelete(info.row.original._id)}
           />
         </div>
@@ -75,12 +75,12 @@ const Artists = () => {
     <>
       <div className="flex justify-between items-center">
         <h1 className="font-bold text-6xl">Gestion des artistes</h1>
-        {/* <Link
+        <Link
           href="/artists/create"
           className="bg-black text-white p-2 h-min rounded-md"
         >
           Ajouter un(e) artiste
-        </Link> */}
+        </Link>
       </div>
       <DataTable
         data={artistsData}
