@@ -30,8 +30,8 @@ const Artists = () => {
     }
   };
 
-  console.log({artistsData});
-  
+  console.log({ artistsData });
+
   const columnHelper = createColumnHelper();
   const columns = [
     columnHelper.accessor('name', {
@@ -46,20 +46,23 @@ const Artists = () => {
       header: 'Images',
       cell: (info) => (
         <Image
-        src={getImageUrl(info.getValue()[0].path)}
-        alt="Artwork"
-        className="w-10 h-10 object-cover"
-        width={40}
-        height={40}
-      />
+          src={getImageUrl(info.getValue()[0].path)}
+          alt="Artwork"
+          className="w-10 h-10 object-cover"
+          width={40}
+          height={40}
+        />
       ),
     }),
     columnHelper.accessor('Actions', {
       cell: (info) => (
         <div className="flex gap-1">
-          <button className="p-2 bg-green-500 text-white">
+          <Link
+            href={`/artists/update/${info.row.original._id}`}
+            className="p-2 bg-green-500 text-white"
+          >
             <Pencil size={16} />
-          </button>
+          </Link>
           <ConfirmDeleteModal
             title={`Vous êtes sur le point de supprimer l'artiste ${info.row.original.name}`}
             onConfirm={() => handleDelete(info.row.original._id)}

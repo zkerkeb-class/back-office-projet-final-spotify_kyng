@@ -8,6 +8,16 @@ export const getArtists = async (page, limit = 10) => {
     }
 }
 
+export const getArtistById = async (id) => {
+    try {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/artist/${id}`);
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error('Error fetching artist by id', error);
+    }
+}
+
 export const deleteArtist = async (id) => {
     try {
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/artist/${id}`, {
@@ -40,5 +50,24 @@ export const createArtist = async (artist) => {
         return data;
     } catch (error) {
         console.error('Error creating artist', error);
+    }
+}
+export const updateArtist = async (artistData,artistID) => {
+    try {
+        const formData = new FormData();
+        formData.append('name', artistData.name);
+        formData.append('genres', artistData.genres);
+        formData.append('image', artistData.images);
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/artist/${artistID}`, {
+            method: 'PUT',
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem('token')}`,
+            },
+            body: formData,
+        });
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error('Error updating artist', error);
     }
 }
