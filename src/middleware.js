@@ -13,12 +13,14 @@ export async function middleware(request) {
   }
   const decoded = decodeJWT(token.value);
   const userRole = decoded.role;
-  const isAlbumPage = request.nextUrl.pathname.startsWith('/album');
+  const isAlbumPage = request.nextUrl.pathname.startsWith('/albums');
   const isAdminPage = request.nextUrl.pathname === '/';
 
   // Restrict access to `/` - Artists NOT allowed
   if (isAdminPage && userRole === 'artist') {
-    return NextResponse.redirect('/album'); // Artists redirected to album page
+      const url = request.nextUrl.clone()
+  url.pathname = '/albums'
+    return NextResponse.rewrite(url); // Artists redirected to album page
   }
 
   // Allow admins & other roles to access `/album`, only block if needed

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import AlbumPreview from './AlbumPreview';
-import { formatDuration, genres, getImageUrl } from '@/utils';
+import { decodeJWT, formatDuration, genres, getImageUrl } from '@/utils';
 import TrackForm from './TrackForm';
 import Input from '@/components/UI/form/Input';
 import ImagePreview from '@/components/upload/ImagePreview';
@@ -11,6 +11,8 @@ import { createAlbum, updateAlbum } from '@/services/album.service';
 import { useRouter } from 'next/navigation';
 
 function AlbumForm({ onCancel, albumData, isEditing }) {
+  const [userRole, setUserRole] = useState('');
+
   const router = useRouter();
   const [isPreview, setIsPreview] = useState(false);
   const [album, setAlbum] = useState({
@@ -27,16 +29,29 @@ function AlbumForm({ onCancel, albumData, isEditing }) {
 
   const [artists, setArtists] = useState([]);
 
+  const fetchArtists = async () => {
+    try {
+      const data = await getArtists();
+      setArtists(data.artists);
+    } catch (error) {
+      console.error('Error fetching artists', error);
+    }
+  };
   useEffect(() => {
-    const fetchArtists = async () => {
-      try {
-        const data = await getArtists();
-        setArtists(data.artists);
-      } catch (error) {
-        console.error('Error fetching artists', error);
-      }
-    };
-    fetchArtists();
+    const token = localStorage.getItem('token');
+    if (!token) {
+      return;
+    }
+    const decoded = decodeJWT(token);
+    setUserRole(decoded.role);
+    if (decoded.role === 'admin') {
+      fetchArtists();
+    }
+    setArtists([{
+      _id: decoded.id,
+      name: 'Artist Spotify',
+    }]);
+    setAlbum({ ...album, artistId: decoded.id });
   }, []);
   const handleSubmit = (e) => {
       e.preventDefault();

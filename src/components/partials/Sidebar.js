@@ -1,7 +1,18 @@
+import { decodeJWT } from "@/utils";
 import { MicVocal,Album, LayoutDashboard, Settings, Folder } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 const Sidebar = () => {
+  const [userRole, setUserRole] = useState('');
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      return;
+    }
+    const decoded = decodeJWT(token);
+    setUserRole(decoded.role);
+  }, []);
   return (
     <aside className=" h-screen border-r border-gray-500">
       <nav className="w-64 gap-40 flex flex-col justify-between">
@@ -20,6 +31,15 @@ const Sidebar = () => {
             <b>Spotify Portal</b>
           </Link>
           </li>
+          {userRole === 'artist' ? (
+                <li className="hover:bg-gray-100">
+                <Link href="/albums" className="flex items-center gap-2 p-4">
+                <Album size={16} />
+                Albums
+                </Link>
+            </li>
+            ) : (
+           <>
           <li className="hover:bg-gray-100">
             <Link href="/" className="flex items-center gap-2 p-4">
               <LayoutDashboard size={16} />
@@ -38,6 +58,9 @@ const Sidebar = () => {
                 Albums
                 </Link>
             </li>
+           </>
+
+            )}
         </ul>
         <ul className="border-t border-gray-500">
            <li className="hover:bg-gray-100">

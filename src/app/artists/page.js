@@ -10,15 +10,24 @@ import React from 'react';
 
 const Artists = () => {
   const [artistsData, setArtistsData] = React.useState([]);
+  const fetchArtists = async () => {
+    const data = await getArtists();
+    setArtistsData(data.artists);
+  };
   React.useEffect(() => {
-    const fetchArtists = async () => {
-      const data = await getArtists();
-      setArtistsData(data.artists);
-    };
     fetchArtists();
   }, []);
 
-  console.log({ artistsData });
+  const handleDelete = async (id) => {
+    try {
+      const data = await deleteArtist(id);
+      console.log(data);
+      fetchArtists();
+      console.log('Deleting artist with id : ', id);
+    } catch (error) {
+      console.error('Error deleting artist', error);
+    }
+  };
 
   const columnHelper = createColumnHelper();
   const columns = [
@@ -54,9 +63,10 @@ const Artists = () => {
           <button className="p-2 bg-green-500 text-white">
             <Pencil size={16} />
           </button>
-          <button className="p-2 bg-red-500 text-white">
-            <X size={16} />
-          </button>
+          <ConfirmDeleteModal
+            title={`Vous êtes sur le point de supprimer l'album "${info.row.original.title}" de ${info.row.original.artistId.name}`}
+            onConfirm={() => handleDelete(info.row.original._id)}
+          />
         </div>
       ),
     }),
@@ -65,12 +75,12 @@ const Artists = () => {
     <>
       <div className="flex justify-between items-center">
         <h1 className="font-bold text-6xl">Gestion des artistes</h1>
-        <Link
+        {/* <Link
           href="/artists/create"
           className="bg-black text-white p-2 h-min rounded-md"
         >
           Ajouter un(e) artiste
-        </Link>
+        </Link> */}
       </div>
       <DataTable
         data={artistsData}
