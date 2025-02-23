@@ -1,8 +1,8 @@
 'use client';
 
-import { use, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import AlbumPreview from './AlbumPreview';
-import { formatDuration } from '@/utils';
+import { decodeJWT, formatDuration, genres, getImageUrl } from '@/utils';
 import TrackForm from './TrackForm';
 import Input from '@/components/UI/form/Input';
 import ImagePreview from '@/components/upload/ImagePreview';
@@ -11,36 +11,61 @@ import { createAlbum, updateAlbum } from '@/services/album.service';
 import { useRouter } from 'next/navigation';
 
 function AlbumForm({ onCancel, albumData, isEditing }) {
+  const [userRole, setUserRole] = useState('');
+
   const router = useRouter();
   const [isPreview, setIsPreview] = useState(false);
   const [album, setAlbum] = useState({
     title: '' || albumData?.title,
     artistId: '' || albumData?.artistId._id,
     releaseDate: '' || albumData?.releaseDate,
-    genre: '' || albumData?.genre,
-    audioTracks: [] || albumData?.audioTracks,
-    image: albumData?.image ,
+    genres: '' || albumData?.genres,
+    audioTracks: albumData?.audioTracks || [],
+    image: albumData?.image,
     duration: 0,
   });
 
+  const [artistName, setArtistName] = useState('');
+
   const [artists, setArtists] = useState([]);
 
+  const fetchArtists = async () => {
+    try {
+      const data = await getArtists();
+      setArtists(data.artists);
+    } catch (error) {
+      console.error('Error fetching artists', error);
+    }
+  };
   useEffect(() => {
-    const fetchArtists = async () => {
-      try {
-        const data = await getArtists();
-        setArtists(data.artists);
-      } catch (error) {
-        console.error('Error fetching artists', error);
-      }
-    };
-    fetchArtists();
+    const token = localStorage.getItem('token');
+    if (!token) {
+      return;
+    }
+    const decoded = decodeJWT(token);
+    setUserRole(decoded.role);
+    if (decoded.role === 'admin') {
+      fetchArtists();
+    }
+    setArtists([{
+      _id: decoded.id,
+      name: 'Artist Spotify',
+    }]);
+    setAlbum({ ...album, artistId: decoded.id });
   }, []);
   const handleSubmit = (e) => {
-    e.preventDefault();
-    createAlbum(album);
-    alert('Album créé avec succès');
-    // router.push('/albums');
+      e.preventDefault();
+      createAlbum(album).then((data) => {
+        if (data.error) {
+          alert('Erreur lors de la création de l\'album');
+
+          return;
+
+        } 
+        
+        alert('Album créé avec succès');
+        router.push('/albums'); 
+      })
   };
 
   const handleUpdateSubmit = (e) => {
@@ -58,27 +83,27 @@ function AlbumForm({ onCancel, albumData, isEditing }) {
   const handleDrop = (e, targetIndex) => {
     e.preventDefault();
     const sourceIndex = parseInt(e.dataTransfer.getData('text/plain'), 10);
-    const newTracks = [...album.tracks];
+    const newTracks = [...album.audioTracks];
     const [removed] = newTracks.splice(sourceIndex, 1);
     newTracks.splice(targetIndex, 0, removed);
     // reset trackNumber
     newTracks.forEach((track, index) => {
       track.trackNumber = index + 1;
     });
-    setAlbum({ ...album, tracks: newTracks });
+    setAlbum({ ...album, audioTracks: newTracks });
   };
 
   if (isPreview) {
     return (
       <AlbumPreview
-        album={album}
+      setAlbum={setAlbum}
+        album={{...album, artistName}}
         onBack={() => setIsPreview(false)}
         onPublish={handleSubmit}
+        isEditing={isEditing}
       />
     );
   }
-  console.log({album,albumData});
-  
 
   return (
     <form
@@ -93,23 +118,33 @@ function AlbumForm({ onCancel, albumData, isEditing }) {
           onChange={(e) => setAlbum({ ...album, title: e.target.value })}
           required
         />
-        <select
-          className={`border rounded-md px-3 py-2 w-full`}
-          onChange={(e) => setAlbum({ ...album, artistId: e.target.value })}
-          required
-        >
-          <option value="">Choisir un artiste</option>
-          {artists.length > 0 &&
-            artists.map((artist) => (
-              <option
-                key={artist._id}
-                value={artist._id}
-                selected={artist._id === album.artistId}
-              >
-                {artist.name}
-              </option>
-            ))}
-        </select>
+        <div>
+          <span className="block text-sm font-medium mb-2">
+            Artiste <span className="text-red-500">*</span>
+          </span>
+          <select
+            className={`border rounded-md px-3 py-2 w-full`}
+            onChange={(e) => {
+              setAlbum({ ...album, artistId: e.target.value })
+              setArtistName(e.target.selectedOptions[0].text);
+            return;
+            }
+          }
+            required
+          >
+            <option value="">Choisir un artiste</option>
+            {artists.length > 0 &&
+              artists.map((artist) => (
+                <option
+                  key={artist._id}
+                  value={artist._id}
+                  selected={artist._id === album.artistId}
+                >
+                  {artist.name}
+                </option>
+              ))}
+          </select>
+        </div>
         <Input
           label="Date de sortie"
           id="releaseDate"
@@ -119,12 +154,7 @@ function AlbumForm({ onCancel, albumData, isEditing }) {
           required
         />
 
-        <Input
-          label="Genre"
-          id="genre"
-          value={album.genre}
-          onChange={(e) => setAlbum({ ...album, genre: e.target.value })}
-        />
+        
 
         <div className="flex items-center gap-1">
           <span className="block text-sm font-medium">Duration :</span>
@@ -136,7 +166,7 @@ function AlbumForm({ onCancel, albumData, isEditing }) {
         <ul className="space-y-2">
           {album.audioTracks.map((track, index) => (
             <li
-              key={track.id}
+              key={`track-${track.id}-${index}-${Math.random().toFixed(2)}`}
               draggable
               onDragStart={(e) => handleDragStart(e, index)}
               onDragOver={(e) => e.preventDefault()}
@@ -165,25 +195,22 @@ function AlbumForm({ onCancel, albumData, isEditing }) {
         <input
           type="file"
           name="image"
-        
           onChange={(e) => setAlbum({ ...album, image: e.target.files[0] })}
         />
         {!isEditing && album.image && (
           <ImagePreview
             src={URL.createObjectURL(album.image)}
             name={album.image.name}
-            size={12}
+            size={200}
           />
         )}
-        {
-          isEditing && album.image && (
-            <ImagePreview
-              src={albumData.image.path}
-              name={`Artwork - ${albumData.title}`}
-              size={12}
-            />
-          )
-        }
+        {isEditing && album.image && (
+          <ImagePreview
+            src={getImageUrl(albumData.image.path)}
+            name={`Artwork - ${albumData.title}`}
+            size={200}
+          />
+        )}
       </div>
 
       <div className="flex justify-end space-x-4 p-4">

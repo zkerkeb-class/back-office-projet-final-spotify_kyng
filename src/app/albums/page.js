@@ -1,93 +1,22 @@
 'use client';
 
-import DataTable from '@/components/ui/DataTable';
-import { deleteAlbum, getAlbums } from '@/services/album.service';
-import { formatDateLocale } from '@/utils';
+import DataTable from '@/components/UI/DataTable';
+import { deleteAlbum, getAlbums, getAlbumsByArtist } from '@/services/album.service';
+import { formatDateLocale, getImageUrl } from '@/utils';
 import { createColumnHelper } from '@tanstack/react-table';
 import { Pencil, X } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-
+import Image from 'next/image';
+import ConfirmDeleteModal from '@/components/UI/form/ConfirmDeleteModal';
+import { getTracksByAlbum } from '@/services/track.service';
+import { decodeJWT } from '@/utils';
 const Albums = () => {
-  // const albumData = [
-  //   {
-  //     title: 'Abbey Road',
-  //     type: 'album',
-  //     artist: 'The Beatles',
-  //     releaseDate: '1969-09-26',
-  //     genres: ['Rock'],
-  //     tracks: [
-  //       { title: 'Come Together', duration: 259 },
-  //       { title: 'Something', duration: 182 },
-  //     ],
-  //     collaborators: ['George Martin'],
-  //     artwork: 'https://via.placeholder.com/150',
-  //     duration: 2580,
-  //   },
-  //   {
-  //     title: 'Thriller',
-  //     type: 'album',
-  //     artist: 'Michael Jackson',
-  //     releaseDate: '1982-11-30',
-  //     genres: ['Pop', 'Rock', 'R&B'],
-  //     tracks: [
-  //       { title: 'Thriller', duration: 357 },
-  //       { title: 'Beat It', duration: 258 },
-  //     ],
-  //     collaborators: ['Quincy Jones'],
-  //     credits: ['Producer: Quincy Jones', 'Engineer: Bruce Swedien'],
-  //     artwork: 'https://via.placeholder.com/150',
-  //     duration: 4220,
-  //   },
-  //   {
-  //     title: 'Back in Black',
-  //     type: 'album',
-  //     artist: 'AC/DC',
-  //     releaseDate: '1980-07-25',
-  //     genres: ['Hard Rock'],
-  //     tracks: [
-  //       { title: 'Hells Bells', duration: 312 },
-  //       { title: 'Back in Black', duration: 255 },
-  //     ],
-  //     collaborators: ['Mutt Lange'],
+ const [userRole, setUserRole] = useState('');
+  const generateRandomString = () =>
+    Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
 
-  //     artwork: 'https://via.placeholder.com/150',
-  //     duration: 2530,
-  //   },
-  //   {
-  //     title: 'The Dark Side of the Moon',
-  //     type: 'album',
-  //     artist: 'Pink Floyd',
-  //     releaseDate: '1973-03-01',
-  //     genres: ['Progressive Rock'],
-  //     tracks: [
-  //       { title: 'Time', duration: 413 },
-  //       { title: 'Money', duration: 382 },
-  //     ],
-  //     collaborators: ['Alan Parsons'],
-
-  //     artwork: 'https://via.placeholder.com/150',
-  //     duration: 2580,
-  //   },
-  //   {
-  //     title: 'Rumours',
-  //     type: 'album',
-  //     artist: 'Fleetwood Mac',
-  //     releaseDate: '1977-02-04',
-  //     genres: ['Rock'],
-  //     tracks: [
-  //       { title: 'Go Your Own Way', duration: 217 },
-  //       { title: 'Dreams', duration: 257 },
-  //     ],
-  //     collaborators: ['Ken Caillat', 'Richard Dashut'],
-  //     artwork: 'https://via.placeholder.com/150',
-  //     duration: 2580,
-  //   },
-  // ];
-
-  const generateRandomString = () => Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-
-  const [albumData, setAlbumData] = useState([]);
+  const [albumData, setAlbumData] = useState(undefined);
   const [meta, setMeta] = useState({
     limit: undefined,
     page: undefined,
@@ -95,14 +24,46 @@ const Albums = () => {
     totalPages: undefined,
   });
   const fetchAlbums = async (page) => {
-    const data = await getAlbums(page);
-console.log(data);
-
-    setAlbumData(data.albums);
-    setMeta(data.meta);
+    try {
+      const data = await getAlbums(page);
+      const albumWithTracks = await Promise.all(data.albums.map(async (album) => {
+        const tracks = await getTracksByAlbum(album._id);
+        album.totalTracks = tracks.meta.total;
+        return album;
+      }))
+      setAlbumData(albumWithTracks);
+      setMeta(data.meta);
+      
+    } catch (error) {
+      console.error('Error fetching albums', error);
+    }
   };
+
+  const fetchAlbumsByArtist = async (artistId) => {
+    try {
+      const data = await getAlbumsByArtist(artistId);
+      const albumWithTracks = await Promise.all(data.albums.map(async (album) => {
+        const tracks = await getTracksByAlbum(album._id);
+        album.totalTracks = tracks.meta.total;
+        return album;
+      }))
+      setAlbumData(albumWithTracks);
+      setMeta(data.meta);
+    } catch (error) {
+      console.error('Error fetching albums', error);
+    }
+  }
   useEffect(() => {
-    fetchAlbums();
+    const token = localStorage.getItem('token');
+    if (!token) {
+      return;
+    }
+    const decoded = decodeJWT(token);
+    setUserRole(decoded.role);
+    if (decoded.role === 'admin') {
+      fetchAlbums();
+    } 
+    fetchAlbumsByArtist(decoded.id);
   }, []);
 
   const handleDelete = async (id) => {
@@ -125,62 +86,43 @@ console.log(data);
     }),
     columnHelper.accessor('artistId', {
       header: 'Artiste',
-      cell: (info) => info.getValue().name,
+      cell: (info) => info.getValue()?.name || 'Artist Spotify',
     }),
     columnHelper.accessor('releaseDate', {
       header: 'Date de sortie',
-      cell: (info) => info.getValue() ? formatDateLocale(info.getValue()) : 'Non renseigné',
+      cell: (info) => (info.getValue() ? formatDateLocale(info.getValue()) : 'Non renseigné'),
     }),
-    columnHelper.accessor('genre', {
-      header: 'Genres',
-      cell: (info) => <span>{info.getValue() ? info.getValue() : 'Non renseigné'}</span>,
-    }),
-    columnHelper.accessor('audioTracks', {
+    columnHelper.accessor('totalTracks', {
       header: 'Pistes',
-      cell: (info) => info.getValue().length,
-    }),
-    columnHelper.accessor('collaborators', {
-      header: 'Collaborateurs',
-      cell: (info) => {
-        if (info.getValue()) {
-          return (
-            <ul>
-              {info.getValue().map((collaborator) => (
-                <li
-                  key={collaborator}
-                  className="mr-2"
-                >
-                  {collaborator}
-                </li>
-              ))}
-            </ul>
-          );
-        }
-        return 'Aucun';
-      },
+      cell: (info) => info.getValue(),
     }),
     columnHelper.accessor('images', {
       header: 'Artwork',
-      cell: (info) => (
-        <img
-          src={info.getValue()[0].path}
-          alt="Artwork"
-          className="w-10 h-10 object-cover"
-        />
-      ),
+      cell: (info) => {
+        return (
+          <Image
+            src={getImageUrl(info.getValue()[0].path)}
+            alt="Artwork"
+            className="w-10 h-10 object-cover"
+            width={40}
+            height={40}
+          />
+        );
+      },
     }),
     columnHelper.accessor('Actions', {
       cell: (info) => (
         <div className="flex gap-1">
-          <Link href={`/albums/update/${info.row.original._id}`} className="p-2 bg-green-500 text-white">
+          <Link
+            href={`/albums/update/${info.row.original._id}`}
+            className="p-2 bg-green-500 text-white"
+          >
             <Pencil size={16} />
           </Link>
-          <button
-            className="p-2 bg-red-500 text-white"
-            onClick={()=>handleDelete(info.row.original._id)}
-          >
-            <X size={16} />
-          </button>
+          <ConfirmDeleteModal
+            title={`Vous êtes sur le point de supprimer l'album "${info.row.original.title}" de ${info.row.original.artistId?.name||'Artist Spotify'}`}
+            onConfirm={() => handleDelete(info.row.original._id)}
+          />
         </div>
       ),
     }),
@@ -200,6 +142,10 @@ console.log(data);
     });
   };
 
+  if (albumData === undefined) {
+    return <p>Chargement...</p>;
+  }
+
   return (
     <>
       <div className="flex justify-between items-center">
@@ -211,6 +157,9 @@ console.log(data);
           Ajouter un album
         </Link>
       </div>
+      {albumData.length === 0 && (
+        <p className="text-center text-xl">Aucun album trouvé</p>
+      )}
       <DataTable
         data={albumData}
         columns={columns}

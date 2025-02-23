@@ -175,42 +175,42 @@ const MetricsDashboard = ({ metrics, initialConfig, history }) => {
     cpu: {
       title: 'Utilisation du CPU',
       getValue: () => metrics.cpuUsage[0],
-      history: history.cpuUsage,
+      history: history?.cpuUsage,
     },
     memory: {
       title: 'Utilisation de la mémoire',
       getValue: () => metrics.memoryUsage.usedMemory / metrics.memoryUsage.totalMemory,
-      history: history.memoryUsage,
+      history: history?.memoryUsage,
     },
     bandwidth: {
       title: 'Bande passante',
       getValue: () => formatBytes(metrics.bandePassante),
-      history: history.bandePassante,
+      history: history?.bandePassante,
     },
     redis: {
       title: 'Latence Redis',
       getValue: () => `${metrics.redisLatency}ms`,
-      history: history.redisLatency,
+      history: history?.redisLatency,
     },
     requests: {
       title: 'Taux de réussite des requêtes',
       getValue: () => metrics.successCount / (metrics.successCount + metrics.failureCount),
-      history: history.successCount,
+      history: history?.successCount,
     },
     media: {
       title: 'Temps de traitement des médias',
       getValue: () => `${metrics.mediaProcessingTime}ms`,
-      history: history.mediaProcessingTime,
+      history: history?.mediaProcessingTime,
     },
     response: {
       title: 'Temps de réponse',
       getValue: () => `${parseInt(metrics.responseTime)}ms`,
-      history: history.responseTime,
+      history: history?.responseTime,
     },
     disk: {
       title: 'Utilisation du disque',
       getValue: () => (metrics.diskUsage === 'N/A' ? 'Non disponible' : `${metrics.diskUsage}%`),
-      history: history.diskUsage,
+      history: history?.diskUsage ?? 'N/A',
     },
   };
 

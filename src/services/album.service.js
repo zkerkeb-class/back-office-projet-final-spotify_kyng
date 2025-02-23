@@ -1,4 +1,4 @@
-import { createTrack } from "./track.service";
+import { createTrack } from './track.service';
 
 export const getAlbums = async (page, limit = 10) => {
   try {
@@ -13,6 +13,8 @@ export const getAlbums = async (page, limit = 10) => {
 };
 
 export const createAlbum = async (album) => {
+  console.log('Creating album', album);
+  
   try {
     //convert album object to FormData
     const formData = new FormData();
@@ -30,7 +32,15 @@ export const createAlbum = async (album) => {
       body: formData,
     });
     const data = await response.json();
+    if (data.error) {
+      throw new Error(data.error);
+    }
     console.log({ data });
+
+    // Create tracks
+    if (!album.audioTracks) {
+      return data;
+    }
 
     Promise.all(
       album.audioTracks.map(async (trackData) => {
@@ -41,6 +51,7 @@ export const createAlbum = async (album) => {
 
     return data;
   } catch (error) {
+
     console.error('Error creating album', error);
   }
 };
@@ -90,5 +101,15 @@ export const getAlbumById = async (id) => {
     return data;
   } catch (error) {
     console.error('Error fetching album by id', error);
+  }
+};
+
+export const getAlbumsByArtist = async (id) => {
+  try {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/album/artist/${id}`);
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error fetching artist by ID', error);
   }
 };
