@@ -9,7 +9,9 @@ const nextConfig = {
       {
         protocol: 'https',
         hostname: 'placehold.co',
-      }
+      },
+      {protocol: 'https', 
+        hostname: 'back-end-projet-final-spotify-kyng.onrender.com'},
     ],
   },
 };
