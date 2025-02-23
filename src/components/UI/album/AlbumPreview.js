@@ -68,7 +68,7 @@ const AlbumPreview = ({ album,setAlbum, onBack, onPublish, isEditing }) => {
         <div className="flex gap-1">
       
           <TrackForm
-      isEditing={isEditing}
+      isEditing={true}
       currentTrack={info.row.original}
       tracks={album.audioTracks}
       
