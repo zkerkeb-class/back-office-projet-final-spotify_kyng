@@ -1,18 +1,20 @@
 'use client';
 
 import { useState } from 'react';
-
-import UploadFile from '@/components/upload/UploadFile';
 import Label from '@/components/UI/form/Label';
 import Input from '@/components/UI/form/Input';
 import { genres } from '@/utils';
+import ImagePreview from '@/components/upload/ImagePreview';
 
-const ArtistForm = ({ onSubmit, onCancel }) => {
+const ArtistForm = ({ onSubmit, onCancel ,isEditing,artistData}) => {
   const [artist, setArtist] = useState({
     name: '',
     genres: '',
     images: undefined,
   });
+
+  console.log({artist});
+  
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -39,7 +41,7 @@ const ArtistForm = ({ onSubmit, onCancel }) => {
         </span>
         <select
           className={`border rounded-md px-3 py-2 w-full`}
-          onChange={(e) => setAlbum({ ...album, genres: e.target.value })}
+          onChange={(e) => setArtist({ ...artist, genres: e.target.value })}
           required
         >
           <option value="">Choisir un genre</option>
@@ -47,7 +49,7 @@ const ArtistForm = ({ onSubmit, onCancel }) => {
             <option
               key={`${genre}-${id}`}
               value={genre}
-              selected={genre === album.genres}
+              selected={genre === artist.genres}
             >
               {genre}
             </option>
@@ -55,8 +57,26 @@ const ArtistForm = ({ onSubmit, onCancel }) => {
         </select>
       </div>
       <div>
-        <Label title="Images de l'artiste" />
-        <UploadFile />
+        <Label title="Photo de profil" />
+        <input
+          type="file"
+          name="image"
+          onChange={(e) => setArtist({ ...artist, images: e.target.files[0] })}
+        />
+        {!isEditing && artist.images && (
+          <ImagePreview
+            src={URL.createObjectURL(artist.images)}
+            name={`Profile - ${artist.name}`}
+            size={200}
+          />
+        )}
+        {isEditing && artist.images && (
+          <ImagePreview
+            src={getImageUrl(artistData.image.path)}
+            name={`Profile - ${artistData.name}`}
+            size={200}
+          />
+        )}
       </div>
       <div className="flex justify-end space-x-4">
         <button
