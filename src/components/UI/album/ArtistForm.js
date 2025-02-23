@@ -6,7 +6,7 @@ import Input from '@/components/UI/form/Input';
 import { genres, getImageUrl } from '@/utils';
 import ImagePreview from '@/components/upload/ImagePreview';
 
-const ArtistForm = ({ onSubmit, onCancel ,isEditing,artistData}) => {
+const ArtistForm = ({ onSubmit, onCancel, isEditing, artistData }) => {
   const [artist, setArtist] = useState({
     name: '' || artistData?.name,
     genres: '' || artistData?.genres,
@@ -17,7 +17,7 @@ const ArtistForm = ({ onSubmit, onCancel ,isEditing,artistData}) => {
     e.preventDefault();
     onSubmit(artist);
   };
-  console.log({artist});
+  console.log({ artist });
 
   return (
     <form
@@ -84,7 +84,11 @@ const ArtistForm = ({ onSubmit, onCancel ,isEditing,artistData}) => {
         >
           Annuler
         </button>
-        <button type="submit">Modifier l'artiste</button>
+        {isEditing ? (
+          <button type="submit">Modifier l'artiste</button>
+        ) : (
+          <button type="submit">Créer</button>
+        )}
       </div>
     </form>
   );
