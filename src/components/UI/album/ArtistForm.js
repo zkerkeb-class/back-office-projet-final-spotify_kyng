@@ -61,14 +61,15 @@ const ArtistForm = ({ onSubmit, onCancel, isEditing, artistData }) => {
           name="image"
           onChange={(e) => setArtist({ ...artist, images: e.target.files[0] })}
         />
-        {!isEditing && artist.images && (
+        {((!isEditing && artist.images) ||
+          (isEditing && artist.images !== artistData.images.cloudfront)) && (
           <ImagePreview
             src={URL.createObjectURL(artist.images)}
             name={`Profile - ${artist.name}`}
             size={200}
           />
         )}
-        {isEditing && artist.images && (
+        {isEditing && artist.images === artistData.images.cloudfront && (
           <ImagePreview
             src={getImageUrl(artist.images)}
             name={`Profile - ${artist.name}`}
