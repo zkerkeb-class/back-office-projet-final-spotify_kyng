@@ -8,7 +8,8 @@ import { Pencil, X } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
-import ConfirmModal from '@/components/UI/form/ConfirmDeleteModal';
+import ConfirmDeleteModal from '@/components/UI/form/ConfirmDeleteModal';
+import { getTracksByAlbum } from '@/services/track.service';
 const Albums = () => {
   // const albumData = [
   //   {
@@ -89,7 +90,7 @@ const Albums = () => {
   const generateRandomString = () =>
     Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
 
-  const [albumData, setAlbumData] = useState([]);
+  const [albumData, setAlbumData] = useState(undefined);
   const [meta, setMeta] = useState({
     limit: undefined,
     page: undefined,
@@ -97,11 +98,19 @@ const Albums = () => {
     totalPages: undefined,
   });
   const fetchAlbums = async (page) => {
-    const data = await getAlbums(page);
-    console.log(data);
-
-    setAlbumData(data.albums);
-    setMeta(data.meta);
+    try {
+      const data = await getAlbums(page);
+      const albumWithTracks = await Promise.all(data.albums.map(async (album) => {
+        const tracks = await getTracksByAlbum(album._id);
+        album.totalTracks = tracks.meta.total;
+        return album;
+      }))
+      setAlbumData(albumWithTracks);
+      setMeta(data.meta);
+      
+    } catch (error) {
+      console.error('Error fetching albums', error);
+    }
   };
   useEffect(() => {
     fetchAlbums();
@@ -133,9 +142,9 @@ const Albums = () => {
       header: 'Date de sortie',
       cell: (info) => (info.getValue() ? formatDateLocale(info.getValue()) : 'Non renseigné'),
     }),
-    columnHelper.accessor('audioTracks', {
+    columnHelper.accessor('totalTracks', {
       header: 'Pistes',
-      cell: (info) => info.getValue().length,
+      cell: (info) => info.getValue(),
     }),
     columnHelper.accessor('images', {
       header: 'Artwork',
@@ -160,7 +169,7 @@ const Albums = () => {
           >
             <Pencil size={16} />
           </Link>
-          <ConfirmModal
+          <ConfirmDeleteModal
             title={`Vous êtes sur le point de supprimer l'album "${info.row.original.title}" de ${info.row.original.artistId.name}`}
             onConfirm={() => handleDelete(info.row.original._id)}
           />
@@ -182,6 +191,10 @@ const Albums = () => {
       return { ...prev, page: prev.page + 1 };
     });
   };
+
+  if (albumData === undefined) {
+    return <p>Chargement...</p>;
+  }
 
   return (
     <>

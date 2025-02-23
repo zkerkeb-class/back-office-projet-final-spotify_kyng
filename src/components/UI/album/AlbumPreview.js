@@ -2,12 +2,15 @@
 
 import DataTable from '@/components/UI/DataTable';
 import ImagePreview from '@/components/upload/ImagePreview';
-import { formatDuration, formatLongText, getImageUrl } from '@/utils';
+import { capitalize, formatDuration, formatLongText, getImageUrl } from '@/utils';
 import { createColumnHelper } from '@tanstack/react-table';
-import { Pencil, X } from 'lucide-react';
+import { Pencil, Play, X } from 'lucide-react';
 import Image from 'next/image';
+import ConfirmDeleteModal from '../form/ConfirmDeleteModal';
+import TrackForm from './TrackForm';
+import { deleteTrack } from '@/services/track.service';
 
-const AlbumPreview = ({ album, onBack, onPublish, isEditing }) => {
+const AlbumPreview = ({ album,setAlbum, onBack, onPublish, isEditing }) => {
   const columnHelper = createColumnHelper();
 
   const tracksColumns = [
@@ -37,18 +40,17 @@ const AlbumPreview = ({ album, onBack, onPublish, isEditing }) => {
       header: 'Crédits',
       cell: (info) => {
         if (info.getValue()) {
-          return (
+            const credits = info.getValue();
+            delete credits._id;
+            return (
             <ul>
-              {info.getValue().map((collaborator) => (
-                <li
-                  key={collaborator}
-                  className="mr-2"
-                >
-                  {collaborator}
-                </li>
+              {Object.entries(credits).map(([role, name]) => (
+              <li key={role} className="mr-2">
+              <strong>{capitalize(role)}:</strong> {name}
+              </li>
               ))}
             </ul>
-          );
+            );
         }
         return 'Aucun';
       },
@@ -61,25 +63,36 @@ const AlbumPreview = ({ album, onBack, onPublish, isEditing }) => {
       header: 'Popularité',
       cell: (info) => info.getValue(),
     }),
-    columnHelper.accessor('audioLink', {
-      header: 'Lien audio',
-      cell: (info) => info.getValue(),
-    }),
     columnHelper.accessor('Actions', {
       cell: (info) => (
         <div className="flex gap-1">
-          <button className="p-2 bg-blue-500 text-white">
-            <Pencil size={16} />
-          </button>
-          <button className="p-2 bg-red-500 text-white">
-            <X size={16} />
-          </button>
+      
+          <TrackForm
+      isEditing={isEditing}
+      currentTrack={info.row.original}
+      tracks={album.audioTracks}
+      
+        onTracksChange={(tracks) => setAlbum({ ...album, audioTracks: tracks })}
+      />
+          <ConfirmDeleteModal
+            title={`Vous êtes sur le point de supprimer le titre "${info.row.original.title}" de l'album ${album.title? `"${album.title}"` : "Non défini"}`}
+            onConfirm={() => handleDelete(info.row.original)}
+          />
         </div>
       ),
     }),
   ];
-  console.log({ album });
 
+  const handleDelete = (track) => {
+    if (isEditing){
+      deleteTrack(track._id);
+      return;
+    }
+    setAlbum({
+      ...album,
+      audioTracks: album.audioTracks.filter((t) => t.trackNumber !== track.trackNumber),
+    });
+  }
   return (
     <>
       <h2 className="text-3xl font-bold mb-4">Prévisualisation de l'album</h2>
@@ -127,7 +140,7 @@ const AlbumPreview = ({ album, onBack, onPublish, isEditing }) => {
             <strong>Durée:</strong> {formatDuration(album.duration)}
           </p>
         </div>
-        {album.audioTracks ?? (
+        {album.audioTracks && (
           <div>
             <h4 className="text-xl font-semibold mb-2">Titres</h4>
             <DataTable

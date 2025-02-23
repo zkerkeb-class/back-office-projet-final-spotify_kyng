@@ -12,8 +12,6 @@ const CreditForm = ({ credits, onCreditsChange }) => {
       setNewCredit({ name: '', role: 'Producteur' });
     }
   };
-  console.log([newCredit, credits]);
-  
 
   return (
     <div className="space-y-4">

@@ -24,7 +24,7 @@ const ConfirmDeleteModal = ({ title, onConfirm }) => {
               {title}
             </DialogTitle>
             <div className="mt-2">
-              <p>Are you sure you want to proceed?</p>
+              <p>Êtes-vous sûr de vouloir continuer ?</p>
             </div>
             <div className="mt-4 flex justify-end">
               <button
@@ -32,14 +32,14 @@ const ConfirmDeleteModal = ({ title, onConfirm }) => {
                 className="mr-2 px-4 py-2 bg-gray-300 text-gray-700 rounded"
                 onClick={() => setIsOpen(false)}
               >
-                No
+                Non
               </button>
               <button
                 type="button"
                 className="px-4 py-2 bg-green-500 text-white rounded"
                 onClick={onConfirm}
               >
-                Yes
+                Oui
               </button>
             </div>
           </DialogPanel>

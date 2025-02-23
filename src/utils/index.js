@@ -98,3 +98,12 @@ export const genres = [
   'Zajal',
   'Baladi',
 ];
+
+export const decodeJWT = (token) => {
+  const base64Url = token.split('.')[1]; // Extract the payload
+  const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/'); // Fix base64 encoding
+  const jsonPayload = JSON.parse(atob(base64)); // Decode and parse JSON
+  return jsonPayload;
+}
+
+export const capitalize = (str) => str.charAt(0).toUpperCase() + str.slice(1);

@@ -18,7 +18,7 @@ function AlbumForm({ onCancel, albumData, isEditing }) {
     artistId: '' || albumData?.artistId._id,
     releaseDate: '' || albumData?.releaseDate,
     genres: '' || albumData?.genres,
-    audioTracks: [] || albumData?.audioTracks,
+    audioTracks: albumData?.audioTracks || [],
     image: albumData?.image,
     duration: 0,
   });
@@ -81,6 +81,7 @@ function AlbumForm({ onCancel, albumData, isEditing }) {
   if (isPreview) {
     return (
       <AlbumPreview
+      setAlbum={setAlbum}
         album={{...album, artistName}}
         onBack={() => setIsPreview(false)}
         onPublish={handleSubmit}
@@ -150,7 +151,7 @@ function AlbumForm({ onCancel, albumData, isEditing }) {
         <ul className="space-y-2">
           {album.audioTracks.map((track, index) => (
             <li
-              key={track.id}
+              key={`track-${track.id}-${index}-${Math.random().toFixed(2)}`}
               draggable
               onDragStart={(e) => handleDragStart(e, index)}
               onDragOver={(e) => e.preventDefault()}

@@ -2,7 +2,7 @@ import { login } from "@/services/auth.service";
 import { cookies } from "next/headers";
 export async function POST(request) {
     try {        
-        const cookiesStore = cookies();
+        const cookiesStore = await cookies();
         const body = await request.json();
         console.log(body);
         

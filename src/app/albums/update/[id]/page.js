@@ -51,8 +51,6 @@ const UpdateAlbum = () => {
   if (!album) {
     return <div className="text-gray-400 text-center text-xl py-4">Album introuvable.</div>;
   }
-  console.log({album});
-  
   
   return (
     <>
