@@ -44,6 +44,7 @@ export const updateTrack = async (trackData, trackId) => {
     formData.append('isExplicit', trackData.isExplicit);
     formData.append('lyrics', trackData.lyrics);
     formData.append('trackNumber', trackData.trackNumber);
+    // formData.append('files', trackData.audioLink);
 
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/track/${trackId}`, {
       method: 'PATCH',
@@ -74,3 +75,19 @@ export const deleteTrack = async (trackId) => {
     console.error('Error deleting track', error);
   }
 }
+
+export const streamTrack = async (audioLink) => {
+  try {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/track/stream/${audioLink}`);
+    console.log('Response Headers:', response.headers.get('Content-Type'));
+    if (!response.ok) {
+      throw new Error(`Error fetching track: ${response.statusText}`);
+    }
+
+    const blob = await response.blob();
+    return URL.createObjectURL(blob);
+  } catch (error) {
+    console.error('Error streaming track:', error);
+    throw error;
+  }
+};

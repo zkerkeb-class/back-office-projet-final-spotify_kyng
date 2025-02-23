@@ -1,5 +1,5 @@
 import { decodeJWT } from "@/utils";
-import { MicVocal,Album, LayoutDashboard, Settings, Folder } from "lucide-react";
+import { MicVocal,Album, LayoutDashboard, Settings, Folder, LogOut } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -64,9 +64,9 @@ const Sidebar = () => {
         </ul>
         <ul className="border-t border-gray-500">
            <li className="hover:bg-gray-100">
-                <Link href="#" className="flex items-center gap-2 p-4">
-                <Settings size={16} />
-                Paramètres
+                <Link href="/api/auth/logout" className="flex items-center gap-2 p-4">
+                <LogOut size={16} />
+                Déconnexion
                 </Link>
             </li>
         </ul>

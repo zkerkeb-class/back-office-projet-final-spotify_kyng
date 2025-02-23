@@ -6,7 +6,7 @@ import { decodeJWT, formatDuration, genres, getImageUrl } from '@/utils';
 import TrackForm from './TrackForm';
 import Input from '@/components/UI/form/Input';
 import ImagePreview from '@/components/upload/ImagePreview';
-import { getArtists } from '@/services/artist.service';
+import { getArtistById, getArtists } from '@/services/artist.service';
 import { createAlbum, updateAlbum } from '@/services/album.service';
 import { useRouter } from 'next/navigation';
 import Loading from '../Loading';
@@ -38,6 +38,21 @@ function AlbumForm({ onCancel, albumData, isEditing }) {
       console.error('Error fetching artists', error);
     }
   };
+  const fetchArtistById = async (artistId) => {
+
+    try {
+      const data = await getArtistById(artistId);
+      setArtistName(data.name);
+      setArtists([
+        {
+          _id: artistId,
+          name: data.name,
+        },
+      ]);
+    } catch (error) {
+      console.error('Error fetching artist by ID', error);
+    }
+  }
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (!token) {
@@ -47,13 +62,11 @@ function AlbumForm({ onCancel, albumData, isEditing }) {
     setUserRole(decoded.role);
     if (decoded.role === 'admin') {
       fetchArtists();
+    } else if (decoded.role === 'artist') {
+
+      fetchArtistById(decoded.id);
     }
-    setArtists([
-      {
-        _id: decoded.id,
-        name: 'Artist Spotify',
-      },
-    ]);
+ 
     setAlbum({ ...album, artistId: decoded.id });
   }, []);
   const handleSubmit = (e) => {
@@ -74,6 +87,8 @@ function AlbumForm({ onCancel, albumData, isEditing }) {
 
   if (loading) return <Loading />;
 
+  console.log({artists,artistName});
+  
   const handleUpdateSubmit = (e) => {
     e.preventDefault();
     // Logique de soumission du formulaire de mise à jour
