@@ -9,10 +9,11 @@ import ImagePreview from '@/components/upload/ImagePreview';
 import { getArtists } from '@/services/artist.service';
 import { createAlbum, updateAlbum } from '@/services/album.service';
 import { useRouter } from 'next/navigation';
+import Loading from '../Loading';
 
 function AlbumForm({ onCancel, albumData, isEditing }) {
   const [userRole, setUserRole] = useState('');
-
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
   const [isPreview, setIsPreview] = useState(false);
   const [album, setAlbum] = useState({
@@ -47,26 +48,31 @@ function AlbumForm({ onCancel, albumData, isEditing }) {
     if (decoded.role === 'admin') {
       fetchArtists();
     }
-    setArtists([{
-      _id: decoded.id,
-      name: 'Artist Spotify',
-    }]);
+    setArtists([
+      {
+        _id: decoded.id,
+        name: 'Artist Spotify',
+      },
+    ]);
     setAlbum({ ...album, artistId: decoded.id });
   }, []);
   const handleSubmit = (e) => {
-      e.preventDefault();
-      createAlbum(album).then((data) => {
-        if (data.error) {
-          alert('Erreur lors de la création de l\'album');
+    e.preventDefault();
+    setLoading(true);
+    createAlbum(album).then((data) => {
+      if (data.error) {
+        alert("Erreur lors de la création de l'album");
 
-          return;
+        return;
+      }
+      setLoading(false);
 
-        } 
-        
-        alert('Album créé avec succès');
-        router.push('/albums'); 
-      })
+      alert('Album créé avec succès');
+      router.push('/albums');
+    });
   };
+
+  if (loading) return <Loading />;
 
   const handleUpdateSubmit = (e) => {
     e.preventDefault();
@@ -96,8 +102,8 @@ function AlbumForm({ onCancel, albumData, isEditing }) {
   if (isPreview) {
     return (
       <AlbumPreview
-      setAlbum={setAlbum}
-        album={{...album, artistName}}
+        setAlbum={setAlbum}
+        album={{ ...album, artistName }}
         onBack={() => setIsPreview(false)}
         onPublish={handleSubmit}
         isEditing={isEditing}
@@ -124,13 +130,12 @@ function AlbumForm({ onCancel, albumData, isEditing }) {
           </span>
           <select
             className={`border rounded-md px-3 py-2 w-full`}
-            defaultValue={isEditing ? album.artistId : ""}
+            defaultValue={isEditing ? album.artistId : ''}
             onChange={(e) => {
-              setAlbum({ ...album, artistId: e.target.value })
+              setAlbum({ ...album, artistId: e.target.value });
               setArtistName(e.target.selectedOptions[0].text);
-            return;
-            }
-          }
+              return;
+            }}
             required
           >
             <option value="">Choisir un artiste</option>
@@ -154,8 +159,6 @@ function AlbumForm({ onCancel, albumData, isEditing }) {
           onChange={(e) => setAlbum({ ...album, releaseDate: e.target.value })}
           required
         />
-
-        
 
         <div className="flex items-center gap-1">
           <span className="block text-sm font-medium">Duration :</span>

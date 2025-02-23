@@ -42,14 +42,17 @@ export const createAlbum = async (album) => {
       return data;
     }
 
-    Promise.all(
+    await Promise.allSettled(
       album.audioTracks.map(async (trackData) => {
         const trackResponse = await createTrack(trackData, data._id, album.artistId);
         console.log('Created track', trackResponse);
       })
-    );
-
+    ).then(() => {
+      console.log('All tracks created');
+    });
     return data;
+
+
   } catch (error) {
 
     console.error('Error creating album', error);
