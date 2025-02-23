@@ -1,25 +1,23 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Label from '@/components/UI/form/Label';
 import Input from '@/components/UI/form/Input';
-import { genres } from '@/utils';
+import { genres, getImageUrl } from '@/utils';
 import ImagePreview from '@/components/upload/ImagePreview';
 
 const ArtistForm = ({ onSubmit, onCancel ,isEditing,artistData}) => {
   const [artist, setArtist] = useState({
-    name: '',
-    genres: '',
-    images: undefined,
+    name: '' || artistData?.name,
+    genres: '' || artistData?.genres,
+    images: undefined || artistData?.images.cloudfront,
   });
-
-  console.log({artist});
-  
 
   const handleSubmit = (e) => {
     e.preventDefault();
     onSubmit(artist);
   };
+  console.log({artist});
 
   return (
     <form
@@ -72,8 +70,8 @@ const ArtistForm = ({ onSubmit, onCancel ,isEditing,artistData}) => {
         )}
         {isEditing && artist.images && (
           <ImagePreview
-            src={getImageUrl(artistData.image.path)}
-            name={`Profile - ${artistData.name}`}
+            src={getImageUrl(artist.images)}
+            name={`Profile - ${artist.name}`}
             size={200}
           />
         )}
@@ -86,7 +84,7 @@ const ArtistForm = ({ onSubmit, onCancel ,isEditing,artistData}) => {
         >
           Annuler
         </button>
-        <button type="submit">Créer l'artiste</button>
+        <button type="submit">Modifier l'artiste</button>
       </div>
     </form>
   );
